@@ -1,0 +1,1 @@
+Yoga aims to be a tool like maven with at first the functionality of dependency management and project setup. It also aims at being version-proof. The project is defined against a particular version of Yoga and Yoga will load itself as the version specified in the project file so that even if Yoga change it will still work with older projects.
