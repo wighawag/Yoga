@@ -12,12 +12,18 @@ class Yoga {
 		
 		
 		// GET THE LATEST VERSION :
-		var newInstall : Bool = Sys.command("haxelib", ["run", "haxelib-runner", "install", "yoga"]) == 0;
+		var returnCode : Int;
+		returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "install", "yoga"]);
+		if (returnCode > 1)
+		{
+			Sys.exit(1);
+		}
+		var newInstall : Bool =  returnCode == 0;
 		
 		// SET IT AS THE CURRENT ONE
 		// TODO in haxelib-runner (when no version supplied set the latest version) and return 1 if already set
-		var newSet : Bool = Sys.command("haxelib", ["run", "haxelib-runner", "set", "yoga"]) == 0;
-		
+		returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "set", "yoga"]);
+		var newSet : Bool = returnCode  == 0;
 		
 		// if it was not the current one, run yoga again 
 		if (newInstall || newSet)
