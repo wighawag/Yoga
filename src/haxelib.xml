@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="yoga" url="http://www.wighawag.com/" license="GPL">
+	<description>Yoga aims to be a tool like maven with at first the functionaility of dependency management and project setup. It also aims at being version-proof. The project is defined against a particular version of Yoga and Yoga will load itself as the version specified in the project file so that even if Yoga change it will still work with older projects.</description>
+    <version name="1">Initial release, grab required haxelib dependencies</version>
+    <user name="wighawag"/>
+    <tag v="maven"/>
+    <tag v="build"/>
+	<tag v="setup"/>
+	<tag v="haxelib"/>
+	<tag v="dependency"/>
+	<depends name="haxelib-runner"/> <!-- last version so that if haxelib change the haxelib runner can handle the changes --> 
+</project>
