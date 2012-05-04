@@ -7,52 +7,75 @@ import sys.io.File;
 
 class Yoga {
 	
-    public static function main() : Void {
+	static private var fileName : String = "yoga.xml";
+	static private var directoryName : String = "yoga" ;
+	static private var warnings : Array<String>;
+	static private var currentDirectory : String;
+	static private var targetDirectory : String = "target";
+	static private var slash : String;
+	static private var prefix : String;
+	
+    static public function main() : Void {
+		warnings = new Array<String>();
 		var args : Array<String> = Sys.args();
 		
+		currentDirectory = getCurrentDirectoryFromLastArgument(args);
 		
-		// GET THE LATEST VERSION :
-		var returnCode : Int;
-		returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "install", "yoga"]);
-		if (returnCode > 1)
+		slash = "/";
+		prefix = ".";
+		if (Sys.systemName().indexOf("Win") != -1)
 		{
-			Sys.exit(1);
-		}
-		var newInstall : Bool =  returnCode == 0;
-		
-		// SET IT AS THE CURRENT ONE
-		// TODO in haxelib-runner (when no version supplied set the latest version) and return 1 if already set
-		returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "set", "yoga"]);
-		var newSet : Bool = returnCode  == 0;
-		
-		// if it was not the current one, run yoga again 
-		if (newInstall || newSet)
-		{
-			runANewYogaInstance(args);
-		}
-		// else execute yoga logic:
-		else
-		{
-			execute(args);
+			slash = "\\";
+			prefix = "_";
 		}
 		
+		execute(args);
     }
 	
-	private static function runANewYogaInstance(args) : Void
-	{
-		var fullArgs = ["run", "yoga"];
-		fullArgs = fullArgs.concat(args);
-		fullArgs.pop();// get rid of the added path when running haxelib run
-		Sys.command("haxelib", fullArgs);
-		Sys.exit(0);
-	}
 	
-	
-	// VERSION SPECIFIC 
-	private static var fileName : String = "yoga.xml";
-	private static function execute(args : Array<String>) : Void
+	static private function execute(args : Array<String>) : Void
 	{
-		fileName = getCurrentDirectoryFromLastArgument(args) + fileName;
+		
+		var settingsFolderPath : String = "";
+		if (Sys.environment().exists("HOME")) {
+			settingsFolderPath = new Path(Sys.getEnv("HOME") + slash + prefix + directoryName).toString();
+		}else if (Sys.environment().exists("USERPROFILE")) {
+			settingsFolderPath = new Path(Sys.getEnv("USERPROFILE") + slash + prefix + directoryName ).toString();
+		}
+		else if (Sys.environment().exists("YOGA_FOLDER"))
+		{
+			settingsFolderPath = Sys.getEnv("YOGA_FOLDER");
+		}
+		else
+		{
+			Sys.println("no Environment variable defined for finding the yoga folder, please set YOGA_FOLDER to the path you want yoga to store its local repo and settings");
+			Sys.exit(1);
+		}
+		
+		Sys.println("local yoga folder " + settingsFolderPath);
+		
+		if (FileSystem.exists(settingsFolderPath))
+		{
+			if (!FileSystem.isDirectory(settingsFolderPath))
+			{
+				Sys.println("local yoga folder exist but it is not a directory");
+				Sys.exit(1);
+			}
+			else
+			{
+				Sys.println("creating folder " + settingsFolderPath + " ...");
+				try
+				{
+					FileSystem.createDirectory(settingsFolderPath);
+				} catch (e : Dynamic)
+				{
+					Sys.println("error while creating the directory " + e + " , you might need to create manuually at " + settingsFolderPath);
+					Sys.exit(1);
+				}
+			}
+		}
+		
+		fileName = currentDirectory + fileName;
 		
         // get access to the config xml
         if (!FileSystem.exists(fileName)){
@@ -80,51 +103,139 @@ class Yoga {
 		}
 		var version : String = yogaVersionTag.firstChild().toString();
 		
-		ensureCorrectVersion(version,args);
+		Sys.println("******* This project use yoga version " + version + " *********");
 		
-		join(project);
+		
+		var dependencies = join(project);
+		
+		generateConfig(project, dependencies);
+		
+		showWarningsAndErrors();
 	}
 	
-	
-	static private function ensureCorrectVersion(version : String, args) 
-	{	
-		var haxelibFileName : String = "haxelib.xml";
-		
-		if (!FileSystem.exists(haxelibFileName)){
-            Sys.println("no "+ haxelibFileName + " found in the current (haxelib yoga) directory");
-            Sys.exit(1);
-        }
-		
-		var content = File.getContent(haxelibFileName);
-		
-		var xml = Xml.parse(content);
-		
-		var project = xml.elementsNamed("project").next();
-		
-		var versionTag = project.elementsNamed("version").next();
-		var yogaCurrentVersion = versionTag.get("name");
-		
-		// if the version required by the project is the current on continue processing
-		if (version != yogaCurrentVersion)
+	static private function generateConfig(project : Xml, dependencies : Array<Dependency>) 
+	{
+		var sourcesTag : Xml = project.elementsNamed("source").next();
+		if (sourcesTag == null)
 		{
-			var returnCode : Int;
-			returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "install", "yoga", version]);
-			if (returnCode > 1)
-			{
-				Sys.println("error in installing yoga version " + version);
-				Sys.exit(1);
-			}
-			returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "set", "yoga", version]);
-			if (returnCode > 1)
-			{
-				Sys.println("error in setting yoga version " + version);
-				Sys.exit(1);
-			}
+			Sys.println("source folder not specified");
+			Sys.exit(1);
+		}
+		var sourcesFolder : String = sourcesTag.firstChild().toString();
+		Sys.println("source : " + sourcesFolder);
+		dependencies.push(new SourceDependency(sourcesFolder));
+		
+		var mainTag : Xml = project.elementsNamed("main").next();
+		if (mainTag == null)
+		{
+			Sys.println("main class not specified");
+			Sys.exit(1);
+		}
+		var mainClass : String = mainTag.firstChild().toString();
+		Sys.println("main class : " + mainClass);
+		
+		
+		var idTag : Xml = project.elementsNamed("id").next();
+		if (idTag == null)
+		{
+			Sys.println("id not specified");
+			Sys.exit(1);
+		}
+		var id : String = idTag.firstChild().toString();
+		var shortName : String = id.substr(id.lastIndexOf(".") + 1);
+		
+		
+		var versionTag : Xml = project.elementsNamed("version").next();
+		if (versionTag == null)
+		{
+			Sys.println("project version not specified");
+			Sys.exit(1);
+		}
+		var projectVersion : String = versionTag.firstChild().toString();
+		
+		if (!FileSystem.exists(currentDirectory + slash + targetDirectory))
+		{
+			FileSystem.createDirectory(currentDirectory + slash + targetDirectory);
+		}
+		
+		for (targetTag in project.elementsNamed("target"))
+		{
+			var targetName = targetTag.get("name");
+			var targetTemplate = targetTag.get("template");
+			var targetOutput = targetTag.get("output");
 			
-			runANewYogaInstance(args);
-			Sys.exit(0);
+			Sys.println("target : " + targetName + " (" + targetTemplate + " -> " + targetOutput + ")");
+			var inputFile = File.read(currentDirectory + targetTemplate, false);
+			var outputFile = File.write(currentDirectory + targetOutput, false);
+			
+			if (targetName == "nme")
+			{
+				var nmml : Xml = Xml.parse(inputFile.readAll().toString());
+				var nmmlProjectTag : Xml = nmml.elementsNamed("project").next();
+				if (nmmlProjectTag == null)
+				{
+					Sys.println("not a valid nmml template, missing project element");
+					Sys.exit(1);
+				}
+				
+				for (nmmlSource in nmmlProjectTag.elementsNamed("source"))
+				{
+					nmmlProjectTag.removeChild(nmmlSource);
+				}
+				
+				for (nmmlHaxelib in nmmlProjectTag.elementsNamed("haxelib"))
+				{
+					nmmlProjectTag.removeChild(nmmlHaxelib);
+				}
+				
+				var nmeDependency : Bool = false;
+				for (dependency in dependencies)
+				{
+					if (Type.getClass(dependency) == HaxelibDependency)
+					{
+						if (cast(dependency, HaxelibDependency).name == "nme")
+						{
+							nmeDependency = true;
+						}
+					}
+					nmmlProjectTag.addChild(Xml.parse(dependency.getNMMLString()));
+				}
+				if (!nmeDependency)
+				{
+					nmmlProjectTag.addChild(Xml.parse(new HaxelibDependency("nme").getNMMLString()));
+				}
+				
+				outputFile.writeString(nmml.toString());
+				
+				outputFile.close();
+				
+			}
+			else
+			{
+				outputFile.writeString(inputFile.readAll().toString());
+				outputFile.writeString("-" + targetName + " " + targetDirectory + slash + shortName + "_" + projectVersion + "." + targetName + "\n");
+				outputFile.writeString("-main " + mainClass + "\n");
+				for (dependency in dependencies)
+				{
+					outputFile.writeString(dependency.getHxmlString() + "\n");
+				}
+				outputFile.close();
+			}
 		}
 	}
+	
+	static private function showWarningsAndErrors() : Void 
+	{
+		if (warnings.length > 0)
+		{
+			Sys.println("Warnings : ");
+			for (warning in warnings)
+			{
+				Sys.println(warning);
+			}
+		}
+	}
+	
 	
 	static private function getCurrentDirectoryFromLastArgument(args:Array<String>) : String
 	{
@@ -144,13 +255,16 @@ class Yoga {
 		return "";		
 	}
 	
-	static private function join(project : Xml) : Void//Array<Dependency>
+	static private function join(project : Xml) : Array<Dependency>
 	{
+		Sys.println("dealing with dependencies ...");
+		
+		var array : Array<Dependency> = new Array<Dependency>();
 		var dependenciesTag = project.elementsNamed("dependencies").next();
 		if (dependenciesTag == null)
 		{
 			Sys.println("no dependencies");
-			return;
+			return array;
 		}
 		var dependencies = dependenciesTag.elements();
 		
@@ -161,12 +275,19 @@ class Yoga {
 				case "haxelib" : 
 					var libraryName : String = dependency.get("name");
 					var version : String = dependency.get("version");
-					var returnCode = Sys.command("haxelib", ["run", "haxelib-runner", "install", libraryName, version ]);
+					
+					var returnCode = Haxelib.install(libraryName, version);
 					if (returnCode > 1)
 					{
-						Sys.println("error in installing " + libraryName + "(" + version + ")");
+						Sys.println("error in installing haxelib " + libraryName + " version " + version );
+						Sys.exit(1);
 					}
+					
+					array.push(new HaxelibDependency(libraryName, version));
+					
+					
 				case "repository" :
+					
 					Sys.println("from repository (Not suppoted yet)");
 					// check if exist locally
 					
@@ -197,5 +318,6 @@ class Yoga {
 					// then get the depedencies is specified (recusrive)
 			}
 		}
+		return array;
 	}
 }

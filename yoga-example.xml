@@ -5,7 +5,17 @@
 	<id>com.wighawag.management.ManagenmentTest</id>
 	<version>0.1</version>
 	
-	<defaultTarget>swf</defaultTarget>
+	<compiler-version>2.0.9</compiler-version>
+	
+	<source>src</source>
+	<main>com.wighawag.management.Yoga</main>
+	
+	<!--
+	<target name="swf" template="compile.hxml" output="compile_swf.hxml" />
+	<target name="cpp" template="compile.hxml" output="compile_cpp.hxml" />
+	-->
+	
+	<target name="nme" template="project.nmml" output="project-generated.nmml" />
 	
 	<dependencies>
 		<haxelib name="hxJson2" version="1" />
