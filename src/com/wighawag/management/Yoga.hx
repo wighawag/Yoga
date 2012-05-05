@@ -340,15 +340,14 @@ class Yoga {
 					
 					
 					//if not get it from the repo
-					getZipFromAnyRepositories(repoProjectId, repoProjectVersion, 
-						function(tmpZipPath : String):Void {
-							Sys.println("zip downloaded :  " + tmpZipPath);
-							// TODO : 
-						},function(error : String) : Void {
-							Sys.println(error);
-							Sys.exit(1);
-						}
-					);
+					var tmpZipPath = getZipFromAnyRepositories(repoProjectId, repoProjectVersion);
+					if (tmpZipPath == null)
+					{
+						Sys.println("cannot find " + repoProjectId + ":" + repoProjectVersion);
+						Sys.exit(1);
+					}
+						
+					Sys.println("zip downloaded :  " + tmpZipPath);
 					
 					
 					//then unzip (+get dependencies if specified (recusrive))
@@ -375,45 +374,40 @@ class Yoga {
 		return array;
 	}
 	
-	static private function getZipFromAnyRepositories(repoProjectId : String, repoProjectVersion : String, onZip : String -> Void, onError : String -> Void) : Void
+	static private function getZipFromAnyRepositories(repoProjectId : String, repoProjectVersion : String) : String
 	{
-		var repoQueue : Array<String> = repoList.copy();
-		nextRepo(repoProjectId,repoProjectVersion,repoQueue,onZip, onError);
-	}
-	
-	static private function nextRepo(repoProjectId : String, repoProjectVersion : String, repoQueue : Array<String>,onZip : String -> Void, onError : String -> Void) : Void
-	{				
-		var remoteZipFileName : String = repoProjectId + "_" + repoProjectVersion + ".zip";
-		if (repoQueue.length == 0)
-		{
-			onError("cannot find " + remoteZipFileName + " in no repo");
-			return;
-		}
-		var repoUrl : String = repoQueue.shift();
 		
-		getZip(repoUrl + "/" + remoteZipFileName , onZip, function(error : String) : Void {
-			nextRepo(repoProjectId, repoProjectVersion, repoQueue, onZip, onError);
-		});
+		var repoQueue : Array<String> = repoList.copy();
+		var zipPath :String = null;
+		do
+		{
+			if (repoQueue.length > 0)
+			{
+				var repoUrl : String = repoQueue.shift();
+				zipPath = getZip(repoUrl + "/" + repoProjectId + "_" + repoProjectVersion + ".zip");
+			}
+		}while (repoQueue.length > 0 && zipPath == null);
+		
+		return zipPath;
 	}
 	
-	static private function getZip(remoteZip : String, onZip : String -> Void, onError : String -> Void) : Void
+	static private function getZip(remoteZip : String) : String
 	{
 		var zipFileName : String = remoteZip.substr(remoteZip.lastIndexOf("/") + 1);
 		var tmpZip = localTmpPath + slash + zipFileName;
 		var tmpOut = sys.io.File.write(tmpZip,true);
 		
 		var h = new haxe.Http(remoteZip);
+		var errorHapenned : Bool = false;
 		h.onError = function(e) {
-			tmpOut.close();
-			sys.FileSystem.deleteFile(tmpZip);
-			onError("cannot get " + remoteZip);
+			errorHapenned = true;
 		};
 		Sys.println("Downloading "+remoteZip+"...");
 		h.customRequest(false, tmpOut);
-		h.onData = function(data : String) : Void{
-			onZip(tmpZip);
-		};
-		
-		
+		if (errorHapenned)
+		{
+			return null;
+		}
+		return tmpZip;
 	}
 }
