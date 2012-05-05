@@ -9,15 +9,23 @@ class Yoga {
 	
 	static private var fileName : String = "yoga.xml";
 	static private var directoryName : String = "yoga" ;
+	static private var settingsFileName : String = "settings.xml";
+	static private var localRepoFolder : String = "repository";
+	static private var localRepoPath : String;
+	static private var localTmpFolder : String = "tmp";
+	static private var localTmpPath : String;
 	static private var warnings : Array<String>;
 	static private var currentDirectory : String;
 	static private var targetDirectory : String = "target";
 	static private var slash : String;
 	static private var prefix : String;
 	
+	static private var repoList : Array<String>;
+	
     static public function main() : Void {
 		warnings = new Array<String>();
 		var args : Array<String> = Sys.args();
+		repoList = new Array<String>();
 		
 		currentDirectory = getCurrentDirectoryFromLastArgument(args);
 		
@@ -26,7 +34,6 @@ class Yoga {
 		if (Sys.systemName().indexOf("Win") != -1)
 		{
 			slash = "\\";
-			prefix = "_";
 		}
 		
 		execute(args);
@@ -61,23 +68,62 @@ class Yoga {
 				Sys.println("local yoga folder exist but it is not a directory");
 				Sys.exit(1);
 			}
-			else
+		}	
+		else
+		{
+			Sys.println("creating folder " + settingsFolderPath + " ...");
+			try
 			{
-				Sys.println("creating folder " + settingsFolderPath + " ...");
-				try
-				{
-					FileSystem.createDirectory(settingsFolderPath);
-				} catch (e : Dynamic)
-				{
-					Sys.println("error while creating the directory " + e + " , you might need to create manuually at " + settingsFolderPath);
-					Sys.exit(1);
-				}
+				FileSystem.createDirectory(settingsFolderPath);
+			} catch (e : Dynamic)
+			{
+				Sys.println("error while creating the directory " + e + " , you might need to create manuually at " + settingsFolderPath);
+				Sys.exit(1);
 			}
 		}
 		
+		var settingsFilePath : String = settingsFolderPath + slash + settingsFileName;
+		if (FileSystem.exists(settingsFilePath))
+		{
+			var settingsXml : Xml = Xml.parse(File.read(settingsFilePath, false).readAll().toString());
+			var settingsTag : Xml = settingsXml.elementsNamed("settings").next();
+			if (settingsTag == null)
+			{
+				Sys.println("no valid settings");
+				Sys.exit(1);
+			}
+			var repositoriesTag : Xml = settingsTag.elementsNamed("repositories").next();
+			if (repositoriesTag != null)
+			{
+				for (repository in repositoriesTag.elementsNamed("repository"))
+				{
+					repoList.push(repository.get("url"));
+				}
+			}
+		}
+		else
+		{
+			Sys.println("no config provided");
+		}
+		
+		localRepoPath = settingsFolderPath + slash + localRepoFolder;
+		if (!FileSystem.exists(localRepoPath))
+		{
+			Sys.println("creating directory : " + localRepoPath + " ...");
+			FileSystem.createDirectory(localRepoPath);
+		}
+		
+		localTmpPath = settingsFolderPath + slash + localTmpFolder;
+		if (!FileSystem.exists(localTmpPath))
+		{
+			Sys.println("creating directory : " + localTmpPath + " ...");
+			FileSystem.createDirectory(localTmpPath);
+		}
+		
+		
 		fileName = currentDirectory + fileName;
 		
-        // get access to the config xml
+        // get access to the project xml
         if (!FileSystem.exists(fileName)){
             Sys.println("no "+ fileName + " found");
             Sys.exit(1);
@@ -287,30 +333,38 @@ class Yoga {
 					
 					
 				case "repository" :
+					var repoProjectId : String = dependency.get("id");
+					var repoProjectVersion : String = dependency.get("version");
 					
-					Sys.println("from repository (Not suppoted yet)");
 					// check if exist locally
 					
+					
 					//if not get it from the repo
+					getZipFromAnyRepositories(repoProjectId, repoProjectVersion, 
+						function(tmpZipPath : String):Void {
+							Sys.println("zip downloaded :  " + tmpZipPath);
+							// TODO : 
+						},function(error : String) : Void {
+							Sys.println(error);
+							Sys.exit(1);
+						}
+					);
+					
 					
 					//then unzip (+get dependencies if specified (recusrive))
 					
-				case "git" :
-					Sys.println("from git (Not suppoted yet)");
-					// check if exist locally
-					
-					//if not: use git to get the tag specified and pu in local repo
-					
-					// then get the depedencies is specified (recusrive)
-				case "svn" :
-					Sys.println("from svn (Not suppoted yet)");
-					// check if exist locally
-					
-					//if not: use svn to get the tag specified and pu in local repo
-					
-					// then get the depedencies is specified (recusrive)
 				case "zip" :
-					Sys.println("from a zip file (Not suppoted yet)");
+					var zipUrl : String = dependency.get("url");
+					Sys.println("repo project from a zip file (Not suppoted yet)");
+					// check if exist locally
+					
+					//if not: download zip and unzip it
+					
+					// then get the depedencies is specified (recusrive)
+				case "sourcezip" :
+					var sourceZipUrl : String = dependency.get("url");
+					var sourcePath : String = dependency.get("srcpath");
+					Sys.println("source from a zip file (Not suppoted yet)");
 					// check if exist locally
 					
 					//if not: download zip and unzip it
@@ -319,5 +373,47 @@ class Yoga {
 			}
 		}
 		return array;
+	}
+	
+	static private function getZipFromAnyRepositories(repoProjectId : String, repoProjectVersion : String, onZip : String -> Void, onError : String -> Void) : Void
+	{
+		var repoQueue : Array<String> = repoList.copy();
+		nextRepo(repoProjectId,repoProjectVersion,repoQueue,onZip, onError);
+	}
+	
+	static private function nextRepo(repoProjectId : String, repoProjectVersion : String, repoQueue : Array<String>,onZip : String -> Void, onError : String -> Void) : Void
+	{				
+		var remoteZipFileName : String = repoProjectId + "_" + repoProjectVersion + ".zip";
+		if (repoQueue.length == 0)
+		{
+			onError("cannot find " + remoteZipFileName + " in no repo");
+			return;
+		}
+		var repoUrl : String = repoQueue.shift();
+		
+		getZip(repoUrl + "/" + remoteZipFileName , onZip, function(error : String) : Void {
+			nextRepo(repoProjectId, repoProjectVersion, repoQueue, onZip, onError);
+		});
+	}
+	
+	static private function getZip(remoteZip : String, onZip : String -> Void, onError : String -> Void) : Void
+	{
+		var zipFileName : String = remoteZip.substr(remoteZip.lastIndexOf("/") + 1);
+		var tmpZip = localTmpPath + slash + zipFileName;
+		var tmpOut = sys.io.File.write(tmpZip,true);
+		
+		var h = new haxe.Http(remoteZip);
+		h.onError = function(e) {
+			tmpOut.close();
+			sys.FileSystem.deleteFile(tmpZip);
+			onError("cannot get " + remoteZip);
+		};
+		Sys.println("Downloading "+remoteZip+"...");
+		h.customRequest(false, tmpOut);
+		h.onData = function(data : String) : Void{
+			onZip(tmpZip);
+		};
+		
+		
 	}
 }

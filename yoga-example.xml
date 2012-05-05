@@ -22,7 +22,6 @@
 		<haxelib name="polygonal" version="1.20" />
 		<repository id="" version="" />
 		<zip url="" />
-		<git url="" tag="" />
-		<svn url="" tag="" />
+		<sourcezip url="" srcpath="" />
 	</dependencies>
 </project>
