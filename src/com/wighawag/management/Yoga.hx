@@ -84,6 +84,7 @@ class Yoga {
 		}
 		
 		yogaSettings = new YogaSettings();
+		yogaSettings.yogaFileName = fileName;
 		
 		var settingsFilePath : String = settingsFolderPath + SystemUtil.slash() + settingsFileName;
 		if (FileSystem.exists(settingsFilePath))

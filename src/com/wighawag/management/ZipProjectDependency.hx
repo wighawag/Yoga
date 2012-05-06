@@ -1,54 +1,60 @@
 package com.wighawag.management;
 import com.wighawag.format.zip.ZipExtractor;
+import com.wighawag.management.DependencySet;
+import com.wighawag.management.YogaSettings;
 import com.wighawag.system.SystemUtil;
 import sys.FileSystem;
 import sys.io.File;
 
-
-class RepositoryDependency implements Dependency
+class ZipProjectDependency implements Dependency
 {
 
-	public var id : String;
-	public var version : String;
+	public var url : String;
 	
-	public function new(id : String, version : String) 
+	public function new(url : String) 
 	{
-		this.id = id;
-		this.version = version;
+		if (url.substr(0, 7) != "http://")
+		{
+			Sys.println("invalid url need to start with http://");
+			Sys.exit(1);
+		}
+		this.url = url;
 	}
 	
 	/* INTERFACE com.wighawag.management.Dependency */
 	
 	public function getHxmlString():String 
 	{
-		return ""; // should be transformed into a sourceDependency ?
+		return ""; // transormed into a source repository ?
 	}
 	
 	public function getNMMLString():String 
 	{
-		return ""; // should be transformed into a sourceDependency ?
+		return ""; // transormed into a source repository ?
 	}
 	
-	public function grab(settings : YogaSettings, dependencySet : DependencySet ):Void 
+	public function grab(settings:YogaSettings, dependencySet:DependencySet):Void 
 	{
-		var repoFolder : String = settings.localRepoPath + SystemUtil.slash() + "remote";
+		// TODO extract from RepositoryDependency and use it here as well
+		
+		
+		var repoFolder : String = settings.localRepoPath + SystemUtil.slash() + "zipProject";
 		if (!FileSystem.exists(repoFolder))
 		{
 			FileSystem.createDirectory(repoFolder);
 		}
-
-		var localRepoProjectPath : String = repoFolder + SystemUtil.slash() + id + "_" + version;
+			
+		var localRepoProjectPath : String = repoFolder + SystemUtil.slash() + StringTools.replace(url.substr(7),"/", "_");
 		
 		// check if exist locally
 		if (!FileSystem.exists(localRepoProjectPath))
 		{
 			
-			
 			//if not get it from the repo
-			var tmpZipPath = ZipExtractor.getZipFromAnyRepositories(settings.localTmpPath, settings.repoList, id, version);
+			var tmpZipPath = ZipExtractor.getZip(settings.localTmpPath, url);
 			if (tmpZipPath == null)
 			{
-				Sys.println("cannot find " + id + ":" + version);
+				Sys.println("cannot download " + url);
 				Sys.exit(1);
 			}
 				
@@ -66,15 +72,9 @@ class RepositoryDependency implements Dependency
 			Sys.println("this dependency does not have any project file, it has been wrongly installed");
 			Sys.exit(1);
 		}
-		//var fileInput = File.read(projectFilePath, false);
+		
 		var fileContent = File.getContent(projectFilePath);
 		var dependencyProject : YogaProject = YogaProject.parse(fileContent);
-		
-		if (id != dependencyProject.id)
-		{
-			Sys.println("id do not match between the declared dependency and the actual dependency project! " + "( id :" + id + ", dependencyId : " + dependencyProject.id + ")" );
-			Sys.exit(1);
-		}
 		
 		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectPath + SystemUtil.slash() + dependencyProject.sourceFolder, dependencyProject.id);
 		if (!dependencySet.contains(sourceDependency))
@@ -88,7 +88,7 @@ class RepositoryDependency implements Dependency
 	
 	public function getUniqueId():String 
 	{
-		return "RepositoryDependency_" + id;
+		return "ZipProjectDependency_" + url;
 	}
 	
 }

@@ -24,15 +24,16 @@ class DependencySet
 		{
 			var registeredDependency : Dependency = dictionary.get(dependency.getUniqueId());
 			Sys.println("dependency already grabbed");
-			/* TODO :
+			
 			var type = Type.getClass(dependency);
 			if (type == HaxelibDependency)
 			{
 				var registeredHaxelibDependency : HaxelibDependency = cast(registeredDependency, HaxelibDependency);
 				// TODO : deal with version comp:
-				if (registeredHaxelibDependency.version < cast(dependency, HaxelibDependency).version)
+				if (registeredHaxelibDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					
+					Sys.println("dependencies on different version ");
+					Sys.exit(1);
 				}
 				
 			}
@@ -40,12 +41,13 @@ class DependencySet
 			{
 				var registeredRepoDependency : RepositoryDependency = cast(registeredDependency, RepositoryDependency);
 				// TODO : deal with version comp:
-				if (registeredRepoDependency.version < cast(dependency, HaxelibDependency).version)
+				if (registeredRepoDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					
+					Sys.println("dependencies on different version ");
+					Sys.exit(1);
 				}
 			}
-			*/
+			
 		}
 		else
 		{

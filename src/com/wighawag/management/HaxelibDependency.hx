@@ -45,7 +45,7 @@ class HaxelibDependency implements Dependency
 	
 	public function getUniqueId():String 
 	{
-		return name;
+		return "HaxelibDependency_" + name;
 	}
 	
 }

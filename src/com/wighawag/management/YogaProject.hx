@@ -114,21 +114,13 @@ class YogaProject
 						
 					case "zip" :
 						var zipUrl : String = dependency.get("url");
-						Sys.println("repo project from a zip file (Not suppoted yet)");
-						// check if exist locally
+						yogaProject.dependencies.push(new ZipProjectDependency(zipUrl));
 						
-						//if not: download zip and unzip it
-						
-						// then get the depedencies is specified (recusrive)
 					case "sourcezip" :
 						var sourceZipUrl : String = dependency.get("url");
 						var sourcePath : String = dependency.get("srcpath");
-						Sys.println("source from a zip file (Not suppoted yet)");
-						// check if exist locally
-						
-						//if not: download zip and unzip it
-						
-						// then get the depedencies is specified (recusrive)
+						Sys.println("zip source " + sourceZipUrl + " " + sourcePath);
+						yogaProject.dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePath));
 				}
 			}
 		}

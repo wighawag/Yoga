@@ -32,7 +32,7 @@ class SourceDependency implements Dependency
 	
 	public function getUniqueId():String 
 	{
-		return _uniqueId;
+		return "SourceDependency_" + _uniqueId;
 	}
 	
 }
