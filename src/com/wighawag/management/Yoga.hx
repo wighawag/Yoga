@@ -1,6 +1,11 @@
 package com.wighawag.management;
 
+import com.wighawag.file.FileUtil;
+import com.wighawag.format.zip.ZipExtractor;
+import com.wighawag.management.YogaSettings;
+import com.wighawag.system.SystemUtil;
 import haxe.io.Path;
+import neko.zip.Reader;
 import sys.io.FileInput;
 import sys.FileSystem;
 import sys.io.File;
@@ -8,32 +13,28 @@ import sys.io.File;
 class Yoga {
 	
 	static private var fileName : String = "yoga.xml";
-	static private var directoryName : String = "yoga" ;
+	static private var directoryName : String = ".yoga" ;
 	static private var settingsFileName : String = "settings.xml";
 	static private var localRepoFolder : String = "repository";
-	static private var localRepoPath : String;
 	static private var localTmpFolder : String = "tmp";
-	static private var localTmpPath : String;
 	static private var warnings : Array<String>;
 	static private var currentDirectory : String;
 	static private var targetDirectory : String = "target";
-	static private var slash : String;
-	static private var prefix : String;
 	
-	static private var repoList : Array<String>;
+	static private var yogaSettings:YogaSettings;
+	
+	static private var targetPath : String;
 	
     static public function main() : Void {
 		warnings = new Array<String>();
 		var args : Array<String> = Sys.args();
-		repoList = new Array<String>();
 		
 		currentDirectory = getCurrentDirectoryFromLastArgument(args);
 		
-		slash = "/";
-		prefix = ".";
-		if (Sys.systemName().indexOf("Win") != -1)
+		targetPath = currentDirectory + SystemUtil.slash() + targetDirectory;
+		if (FileSystem.exists(targetPath))
 		{
-			slash = "\\";
+			FileUtil.unlink(targetPath);
 		}
 		
 		execute(args);
@@ -45,9 +46,9 @@ class Yoga {
 		
 		var settingsFolderPath : String = "";
 		if (Sys.environment().exists("HOME")) {
-			settingsFolderPath = new Path(Sys.getEnv("HOME") + slash + prefix + directoryName).toString();
+			settingsFolderPath = new Path(Sys.getEnv("HOME") + SystemUtil.slash() + directoryName).toString();
 		}else if (Sys.environment().exists("USERPROFILE")) {
-			settingsFolderPath = new Path(Sys.getEnv("USERPROFILE") + slash + prefix + directoryName ).toString();
+			settingsFolderPath = new Path(Sys.getEnv("USERPROFILE") + SystemUtil.slash() + directoryName ).toString();
 		}
 		else if (Sys.environment().exists("YOGA_FOLDER"))
 		{
@@ -82,7 +83,9 @@ class Yoga {
 			}
 		}
 		
-		var settingsFilePath : String = settingsFolderPath + slash + settingsFileName;
+		yogaSettings = new YogaSettings();
+		
+		var settingsFilePath : String = settingsFolderPath + SystemUtil.slash() + settingsFileName;
 		if (FileSystem.exists(settingsFilePath))
 		{
 			var settingsXml : Xml = Xml.parse(File.read(settingsFilePath, false).readAll().toString());
@@ -97,7 +100,8 @@ class Yoga {
 			{
 				for (repository in repositoriesTag.elementsNamed("repository"))
 				{
-					repoList.push(repository.get("url"));
+					Sys.println("add repo " + repository.get("url"));
+					yogaSettings.repoList.push(repository.get("url"));
 				}
 			}
 		}
@@ -106,115 +110,57 @@ class Yoga {
 			Sys.println("no config provided");
 		}
 		
-		localRepoPath = settingsFolderPath + slash + localRepoFolder;
-		if (!FileSystem.exists(localRepoPath))
+		
+		yogaSettings.localRepoPath = settingsFolderPath + SystemUtil.slash() + localRepoFolder;
+		if (!FileSystem.exists(yogaSettings.localRepoPath))
 		{
-			Sys.println("creating directory : " + localRepoPath + " ...");
-			FileSystem.createDirectory(localRepoPath);
+			Sys.println("creating directory : " + yogaSettings.localRepoPath + " ...");
+			FileSystem.createDirectory(yogaSettings.localRepoPath);
 		}
 		
-		localTmpPath = settingsFolderPath + slash + localTmpFolder;
-		if (!FileSystem.exists(localTmpPath))
+		yogaSettings.localTmpPath = settingsFolderPath + SystemUtil.slash() + localTmpFolder;
+		if (!FileSystem.exists(yogaSettings.localTmpPath))
 		{
-			Sys.println("creating directory : " + localTmpPath + " ...");
-			FileSystem.createDirectory(localTmpPath);
+			Sys.println("creating directory : " + yogaSettings.localTmpPath + " ...");
+			FileSystem.createDirectory(yogaSettings.localTmpPath);
 		}
 		
 		
-		fileName = currentDirectory + fileName;
+		var currentProjectFilePath = currentDirectory + fileName;
 		
         // get access to the project xml
-        if (!FileSystem.exists(fileName)){
+        if (!FileSystem.exists(currentProjectFilePath)){
             Sys.println("no "+ fileName + " found");
             Sys.exit(1);
         }
 		
-		var content = File.getContent(fileName);
+		var content = File.getContent(currentProjectFilePath);
 		
-		var xml = Xml.parse(content);
-		
-		var project = xml.elementsNamed("project").next();
-		
-		if (project == null)
-		{
-			Sys.println("no project element found");
-			Sys.exit(1);
-		}
-		
-		var yogaVersionTag = project.elementsNamed("yoga-version").next();
-		if (yogaVersionTag == null)
-		{
-			Sys.println("no yoga-version element found");
-			Sys.exit(1);
-		}
-		var version : String = yogaVersionTag.firstChild().toString();
-		
-		Sys.println("******* This project use yoga version " + version + " *********");
+		var currentProject : YogaProject = YogaProject.parse(content);
 		
 		
-		var dependencies = join(project);
+		Sys.println("******* This project use yoga version " + currentProject.yogaVersion + " *********");
 		
-		generateConfig(project, dependencies);
+		
+		var dependencySet : DependencySet = new DependencySet();
+		currentProject.join(yogaSettings, dependencySet);
+		
+		generateConfig(currentProject, dependencySet);
 		
 		showWarningsAndErrors();
 	}
 	
-	static private function generateConfig(project : Xml, dependencies : Array<Dependency>) 
+	static private function generateConfig(yogaProject : YogaProject, dependencySet : DependencySet) : Void
 	{
-		var sourcesTag : Xml = project.elementsNamed("source").next();
-		if (sourcesTag == null)
+		FileSystem.createDirectory(targetPath);
+		
+		for (target in yogaProject.targets)
 		{
-			Sys.println("source folder not specified");
-			Sys.exit(1);
-		}
-		var sourcesFolder : String = sourcesTag.firstChild().toString();
-		Sys.println("source : " + sourcesFolder);
-		dependencies.push(new SourceDependency(sourcesFolder));
-		
-		var mainTag : Xml = project.elementsNamed("main").next();
-		if (mainTag == null)
-		{
-			Sys.println("main class not specified");
-			Sys.exit(1);
-		}
-		var mainClass : String = mainTag.firstChild().toString();
-		Sys.println("main class : " + mainClass);
-		
-		
-		var idTag : Xml = project.elementsNamed("id").next();
-		if (idTag == null)
-		{
-			Sys.println("id not specified");
-			Sys.exit(1);
-		}
-		var id : String = idTag.firstChild().toString();
-		var shortName : String = id.substr(id.lastIndexOf(".") + 1);
-		
-		
-		var versionTag : Xml = project.elementsNamed("version").next();
-		if (versionTag == null)
-		{
-			Sys.println("project version not specified");
-			Sys.exit(1);
-		}
-		var projectVersion : String = versionTag.firstChild().toString();
-		
-		if (!FileSystem.exists(currentDirectory + slash + targetDirectory))
-		{
-			FileSystem.createDirectory(currentDirectory + slash + targetDirectory);
-		}
-		
-		for (targetTag in project.elementsNamed("target"))
-		{
-			var targetName = targetTag.get("name");
-			var targetTemplate = targetTag.get("template");
-			var targetOutput = targetTag.get("output");
+			Sys.println("target : " + target.name + " (" + target.template + " -> " + target.output + ")");
+			var inputFile = File.read(currentDirectory + target.template, false);
+			var outputFile = File.write(currentDirectory + target.output, false);
 			
-			Sys.println("target : " + targetName + " (" + targetTemplate + " -> " + targetOutput + ")");
-			var inputFile = File.read(currentDirectory + targetTemplate, false);
-			var outputFile = File.write(currentDirectory + targetOutput, false);
-			
-			if (targetName == "nme")
+			if (target.name == "nme")
 			{
 				var nmml : Xml = Xml.parse(inputFile.readAll().toString());
 				var nmmlProjectTag : Xml = nmml.elementsNamed("project").next();
@@ -235,7 +181,7 @@ class Yoga {
 				}
 				
 				var nmeDependency : Bool = false;
-				for (dependency in dependencies)
+				for (dependency in dependencySet.getDependencies())
 				{
 					if (Type.getClass(dependency) == HaxelibDependency)
 					{
@@ -259,9 +205,9 @@ class Yoga {
 			else
 			{
 				outputFile.writeString(inputFile.readAll().toString());
-				outputFile.writeString("-" + targetName + " " + targetDirectory + slash + shortName + "_" + projectVersion + "." + targetName + "\n");
-				outputFile.writeString("-main " + mainClass + "\n");
-				for (dependency in dependencies)
+				outputFile.writeString("-" + target.name + " " + targetDirectory + SystemUtil.slash() + yogaProject.shortName + "_" + yogaProject.version + "." + target.name + "\n");
+				outputFile.writeString("-main " + yogaProject.mainClass + "\n");
+				for (dependency in dependencySet.getDependencies())
 				{
 					outputFile.writeString(dependency.getHxmlString() + "\n");
 				}
@@ -301,113 +247,4 @@ class Yoga {
 		return "";		
 	}
 	
-	static private function join(project : Xml) : Array<Dependency>
-	{
-		Sys.println("dealing with dependencies ...");
-		
-		var array : Array<Dependency> = new Array<Dependency>();
-		var dependenciesTag = project.elementsNamed("dependencies").next();
-		if (dependenciesTag == null)
-		{
-			Sys.println("no dependencies");
-			return array;
-		}
-		var dependencies = dependenciesTag.elements();
-		
-		for (dependency in dependencies)
-		{
-			switch(dependency.nodeName)
-			{		
-				case "haxelib" : 
-					var libraryName : String = dependency.get("name");
-					var version : String = dependency.get("version");
-					
-					var returnCode = Haxelib.install(libraryName, version);
-					if (returnCode > 1)
-					{
-						Sys.println("error in installing haxelib " + libraryName + " version " + version );
-						Sys.exit(1);
-					}
-					
-					array.push(new HaxelibDependency(libraryName, version));
-					
-					
-				case "repository" :
-					var repoProjectId : String = dependency.get("id");
-					var repoProjectVersion : String = dependency.get("version");
-					
-					// check if exist locally
-					
-					
-					//if not get it from the repo
-					var tmpZipPath = getZipFromAnyRepositories(repoProjectId, repoProjectVersion);
-					if (tmpZipPath == null)
-					{
-						Sys.println("cannot find " + repoProjectId + ":" + repoProjectVersion);
-						Sys.exit(1);
-					}
-						
-					Sys.println("zip downloaded :  " + tmpZipPath);
-					
-					
-					//then unzip (+get dependencies if specified (recusrive))
-					
-				case "zip" :
-					var zipUrl : String = dependency.get("url");
-					Sys.println("repo project from a zip file (Not suppoted yet)");
-					// check if exist locally
-					
-					//if not: download zip and unzip it
-					
-					// then get the depedencies is specified (recusrive)
-				case "sourcezip" :
-					var sourceZipUrl : String = dependency.get("url");
-					var sourcePath : String = dependency.get("srcpath");
-					Sys.println("source from a zip file (Not suppoted yet)");
-					// check if exist locally
-					
-					//if not: download zip and unzip it
-					
-					// then get the depedencies is specified (recusrive)
-			}
-		}
-		return array;
-	}
-	
-	static private function getZipFromAnyRepositories(repoProjectId : String, repoProjectVersion : String) : String
-	{
-		
-		var repoQueue : Array<String> = repoList.copy();
-		var zipPath :String = null;
-		do
-		{
-			if (repoQueue.length > 0)
-			{
-				var repoUrl : String = repoQueue.shift();
-				zipPath = getZip(repoUrl + "/" + repoProjectId + "_" + repoProjectVersion + ".zip");
-			}
-		}while (repoQueue.length > 0 && zipPath == null);
-		
-		return zipPath;
-	}
-	
-	static private function getZip(remoteZip : String) : String
-	{
-		var zipFileName : String = remoteZip.substr(remoteZip.lastIndexOf("/") + 1);
-		var tmpZip = localTmpPath + slash + zipFileName;
-		var tmpOut = sys.io.File.write(tmpZip,true);
-		
-		var h = new haxe.Http(remoteZip);
-		var errorHapenned : Bool = false;
-		h.onError = function(e) {
-			errorHapenned = true;
-		};
-		Sys.println("Downloading "+remoteZip+"...");
-		h.customRequest(false, tmpOut);
-		if (errorHapenned)
-		{
-			return null;
-		}
-		return tmpZip;
-	}
 }

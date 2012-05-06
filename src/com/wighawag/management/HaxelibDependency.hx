@@ -32,4 +32,20 @@ class HaxelibDependency implements Dependency
 		return '<haxelib name="'+ name +'" version="' + version + '" />';
 	}
 	
+	public function grab(settings : YogaSettings, dependencySet : DependencySet) : Void
+	{
+		var returnCode = Haxelib.install(name, version);
+		if (returnCode > 1)
+		{
+			Sys.println("error in installing haxelib " + name + " version " + version );
+			Sys.exit(1);
+		}
+		dependencySet.add(this);
+	}
+	
+	public function getUniqueId():String 
+	{
+		return name;
+	}
+	
 }
