@@ -50,9 +50,11 @@ class ZipProjectDependency implements Dependency
 		if (!FileSystem.exists(localRepoProjectPath))
 		{
 			
+			var zipFileName : String = StringTools.replace(url.substr(7),"/", "_");
+			var tmpZipPath = settings.localTmpPath + SystemUtil.slash() + zipFileName;
 			//if not get it from the repo
-			var tmpZipPath = ZipExtractor.getZip(settings.localTmpPath, url);
-			if (tmpZipPath == null)
+			var got : Bool = ZipExtractor.getZip(tmpZipPath , url);
+			if (!got)
 			{
 				Sys.println("cannot download " + url);
 				Sys.exit(1);

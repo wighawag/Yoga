@@ -1,4 +1,5 @@
 package com.wighawag.format.zip;
+import com.wighawag.file.FileUtil;
 import com.wighawag.system.SystemUtil;
 import haxe.io.Path;
 import neko.zip.Reader;
@@ -57,37 +58,61 @@ class ZipExtractor
 	{
 		Sys.println("attemtping to get " + repoProjectId + " : " + repoProjectVersion + " from " + repoList);
 		var repoQueue : Array<String> = repoList.copy();
-		var zipPath :String = null;
+		var tmpZip :String = null;
+		var got : Bool = false;
 		do
 		{
 			if (repoQueue.length > 0)
 			{
 				var repoUrl : String = repoQueue.shift();
-				zipPath = getZip(destinationFolder, repoUrl + "/" + repoProjectId + "_" + repoProjectVersion + ".zip");
+				var zipFileName : String = repoProjectId + '_' + repoProjectVersion + '.zip';
+				tmpZip = destinationFolder + SystemUtil.slash() + zipFileName;
+				got = getZip(tmpZip, repoUrl + "/" + zipFileName);
 			}
-		}while (repoQueue.length > 0 && zipPath == null);
+		}while (repoQueue.length > 0 &&  !got);
 		
-		return zipPath;
+		return tmpZip;
 	}
 	
-	static public function getZip(destinationFolder : String, remoteZip : String) : String
+	static public function getZip(destinationZip : String, remoteZip : String) : Bool
 	{
-		var zipFileName : String = remoteZip.substr(remoteZip.lastIndexOf("/") + 1);
-		var tmpZip = destinationFolder + SystemUtil.slash() + zipFileName;
-		var tmpOut = sys.io.File.write(tmpZip,true);
+		
+		var tmpOut = sys.io.File.write(destinationZip,true);
 		
 		var h = new haxe.Http(remoteZip);
 		var errorHapenned : Bool = false;
+		var newLocation : String = null;
+		h.onStatus = function (status : Int) : Void {
+			if (status == 302)
+			{
+				newLocation = h.responseHeaders.get("Location");
+				Sys.println("redirect to " +  newLocation);
+			}
+		}
 		h.onError = function(e) {
 			errorHapenned = true;
 		};
-		Sys.println("Downloading "+remoteZip+" to " + tmpZip);
-		h.customRequest(false, tmpOut);
-		if (errorHapenned)
+		Sys.println("Downloading " + remoteZip + " to " + destinationZip);
+		try{
+			h.customRequest(false, tmpOut);
+		}catch (e : Dynamic)
 		{
-			return null;
+			Sys.println('error : ' + e.toString());
+			if (newLocation != null)
+			{
+				Sys.println("redirection");
+			}
+			FileSystem.deleteFile(destinationZip);
+			errorHapenned = true;
+			
 		}
-		return tmpZip;
+		if (newLocation != null)
+		{
+			return getZip(destinationZip, newLocation);
+		}
+		
+		Sys.println("request done");
+		return !errorHapenned;
 	}
 	
 }

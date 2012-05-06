@@ -46,9 +46,11 @@ class ZipSourceDependency implements Dependency
 		if (!FileSystem.exists(localRepoProjectPath))
 		{
 			
+			var zipFileName : String = StringTools.replace(url.substr(7),"/", "_");
+			var tmpZipPath = settings.localTmpPath + SystemUtil.slash() + zipFileName;
 			//if not get it from the repo
-			var tmpZipPath = ZipExtractor.getZip(settings.localTmpPath, url);
-			if (tmpZipPath == null)
+			var got : Bool = ZipExtractor.getZip(tmpZipPath , url);
+			if (!got)
 			{
 				Sys.println("cannot download " + url);
 				Sys.exit(1);
@@ -61,7 +63,42 @@ class ZipSourceDependency implements Dependency
 			ZipExtractor.extract(tmpZipPath, localRepoProjectPath);
 		}
 		
-		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectPath + SystemUtil.slash() + srcPath, getUniqueId());
+		var finalPath : String = localRepoProjectPath + SystemUtil.slash() + StringTools.replace(srcPath, "/", SystemUtil.slash());
+		if (!FileSystem.exists(finalPath))
+		{
+			var foundAlternative : Bool = false;
+			if (srcPath.substr(0,2) == "*/") // support '*/' only when src folder is one level deep
+			{
+				var files : Array<String> = FileSystem.readDirectory(localRepoProjectPath);
+				for (file in files)
+				{
+					if (FileSystem.isDirectory(localRepoProjectPath + SystemUtil.slash() + file))
+					{
+						var subFiles : Array<String> = FileSystem.readDirectory(localRepoProjectPath + SystemUtil.slash() + file);
+						for (subfile in subFiles)
+						{
+							if (subfile == srcPath.substr(2))
+							{
+								finalPath = localRepoProjectPath + SystemUtil.slash() + file + SystemUtil.slash() + subfile;
+								foundAlternative = true;
+								break;
+							}
+						}
+					}
+					if (foundAlternative)
+					{
+						break;
+					}
+				}
+			}
+			if (!foundAlternative)
+			{
+				Sys.println("the srcPath '" + finalPath + "' does not exist");
+				Sys.exit(1);
+			}
+		}
+		
+		var sourceDependency : SourceDependency = new SourceDependency(finalPath, getUniqueId());
 		if (!dependencySet.contains(sourceDependency))
 		{
 			dependencySet.add(sourceDependency);
