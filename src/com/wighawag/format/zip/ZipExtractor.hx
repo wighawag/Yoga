@@ -1,15 +1,51 @@
 package com.wighawag.format.zip;
 import com.wighawag.file.FileUtil;
 import com.wighawag.system.SystemUtil;
+import haxe.io.Bytes;
 import haxe.io.Path;
 import neko.zip.Reader;
+import neko.zip.Writer;
 import sys.FileSystem;
 import sys.io.File;
 
-
+typedef FileZipEntry = {
+	var fileTime : Date;
+	var fileName : String;
+	var data : Bytes;
+}
+	
 class ZipExtractor 
 {
 
+	static function populateZipEntries(folder, archiveData : Array<FileZipEntry>, ?prefix : String = "") : Void
+	{
+		var files = FileSystem.readDirectory(folder);
+		for (file in files)
+		{
+			var zipFileName = prefix + file;
+			var filePath : String = folder + SystemUtil.slash() + file;
+			
+			if (FileSystem.isDirectory(filePath))
+			{
+				populateZipEntries(filePath, archiveData, zipFileName + "/");
+			}
+			else
+			{
+				archiveData.push( { fileTime : Date.now(), fileName : zipFileName, data : File.getBytes(filePath) } );
+			}
+		}
+	}
+	
+	static public function compress(folder : String, outputZip : String) : Void
+	{
+		var archiveData : Array<FileZipEntry> = new Array<FileZipEntry>();
+		populateZipEntries(folder, archiveData);
+		
+		var fout = File.write(outputZip, true);
+		Writer.writeZip(fout, archiveData, -1);
+		fout.close();
+	}
+	
 	static public function extract(zipPath : String, outputFolder : String) : Void 
 	{
 		var slash = "/";

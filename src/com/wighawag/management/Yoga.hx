@@ -31,6 +31,8 @@ class Yoga {
 		
 		currentDirectory = getCurrentDirectoryFromLastArgument(args);
 		
+		
+		
 		targetPath = currentDirectory + SystemUtil.slash() + targetDirectory;
 		if (FileSystem.exists(targetPath))
 		{
@@ -38,6 +40,7 @@ class Yoga {
 		}
 		
 		execute(args);
+
     }
 	
 	
@@ -143,12 +146,29 @@ class Yoga {
 		Sys.println("******* This project use yoga version " + currentProject.yogaVersion + " *********");
 		
 		
-		var dependencySet : DependencySet = new DependencySet();
-		currentProject.join(yogaSettings, dependencySet);
 		
-		generateConfig(currentProject, dependencySet);
 		
-		showWarningsAndErrors();
+		if (args.length > 1)
+		{
+			var command : String = args[0];
+			if (command == "install")
+			{
+				//ZipExtractor.compress(currentDirectory, currentDirectory.substr(0, currentDirectory.length -1) + SystemUtil.slash() + '..' + SystemUtil.slash() + 'tmp.zip');
+				var dirToCopy : massive.neko.io.File = massive.neko.io.File.create(currentDirectory);
+				dirToCopy.copyTo(massive.neko.io.File.create(yogaSettings.localRepoPath + SystemUtil.slash() + 'remote' + SystemUtil.slash() + currentProject.id + '_' + currentProject.version + SystemUtil.slash()), false);
+			}
+		}
+		else
+		{
+			var dependencySet : DependencySet = new DependencySet();
+			currentProject.join(yogaSettings, dependencySet);
+			
+			generateConfig(currentProject, dependencySet);
+			
+			showWarningsAndErrors();
+		}
+		
+		
 	}
 	
 	static private function generateConfig(yogaProject : YogaProject, dependencySet : DependencySet) : Void

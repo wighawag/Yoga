@@ -29,6 +29,7 @@
   <haxelib>
     <library name="hsl-1" />
     <library name="hxssl" />
+    <library name="mlib" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
