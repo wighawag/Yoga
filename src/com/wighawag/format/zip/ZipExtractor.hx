@@ -77,8 +77,19 @@ class ZipExtractor
 			{
 				
 				var dirPath = Path.directory( filePath );
+				if (dirPath.lastIndexOf(SystemUtil.slash()) == dirPath.length - 1)
+				{
+					dirPath = dirPath.substr(0, dirPath.length - 1);
+				}
 				if ( !FileSystem.exists( dirPath ) ) {
+					try{
 					FileSystem.createDirectory(dirPath);
+					}
+					catch (e: Dynamic)
+					{
+						Sys.println('error while creating ' + dirPath + '  ' + filePath);
+						Sys.exit(1);
+					}
 				}
 
 				var file = File.write( filePath, true );

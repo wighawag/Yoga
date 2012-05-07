@@ -37,48 +37,41 @@ class ZipProjectDependency implements Dependency
 	{
 		// TODO extract from RepositoryDependency and use it here as well
 		
-		
-		var repoFolder : String = settings.localRepoPath + SystemUtil.slash() + "zipProject";
-		if (!FileSystem.exists(repoFolder))
-		{
-			FileSystem.createDirectory(repoFolder);
-		}
 			
-		var localRepoProjectPath : String = repoFolder + SystemUtil.slash() + StringTools.replace(url.substr(7),"/", "_");
+		var localRepoProjectDirectory  = settings.localZipProjectRepo.resolveDirectory(StringTools.replace(url.substr(7),"/", "_"));
 		
 		// check if exist locally
-		if (!FileSystem.exists(localRepoProjectPath))
+		if (localRepoProjectDirectory.exists)
 		{
 			
 			var zipFileName : String = StringTools.replace(url.substr(7),"/", "_");
-			var tmpZipPath = settings.localTmpPath + SystemUtil.slash() + zipFileName;
+			var tmpZipFile = settings.localTmp.resolveFile(zipFileName);
 			//if not get it from the repo
-			var got : Bool = ZipExtractor.getZip(tmpZipPath , url);
+			var got : Bool = ZipExtractor.getZip(tmpZipFile.nativePath , url);
 			if (!got)
 			{
 				Sys.println("cannot download " + url);
 				Sys.exit(1);
 			}
 				
-			Sys.println("zip downloaded :  " + tmpZipPath);
+			Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
 			
 			//then unzip 
-			Sys.println("unzipping " + tmpZipPath + " to " + localRepoProjectPath);
-			ZipExtractor.extract(tmpZipPath, localRepoProjectPath);
+			Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory);
+			ZipExtractor.extract(tmpZipFile.nativePath, localRepoProjectDirectory.nativePath);
 		}
 		
 		// get project and parse it :
-		var projectFilePath = localRepoProjectPath + SystemUtil.slash() + settings.yogaFileName;
-		if (!FileSystem.exists(projectFilePath))
+		var projectFile = localRepoProjectDirectory.resolveFile(settings.yogaFileName);
+		if (!projectFile.exists)
 		{
 			Sys.println("this dependency does not have any project file, it has been wrongly installed");
 			Sys.exit(1);
 		}
 		
-		var fileContent = File.getContent(projectFilePath);
-		var dependencyProject : YogaProject = YogaProject.parse(fileContent);
-		
-		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectPath + SystemUtil.slash() + dependencyProject.sourceFolder, dependencyProject.id);
+		var dependencyProject : YogaProject = YogaProject.parse(projectFile.readString());
+		// TODO deal with multiple src folder (other dependency as well)
+		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(dependencyProject.sourceFolder).nativePath, dependencyProject.id);
 		if (!dependencySet.contains(sourceDependency))
 		{
 			dependencySet.add(sourceDependency);
