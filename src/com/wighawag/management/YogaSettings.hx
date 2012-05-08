@@ -13,10 +13,12 @@ class YogaSettings
 	
 	public var repoList : Array<String>;
 	public var yogaFileName : String;
+	public var targetDirectory : String;
 	
 	public function new(settingsDirectory : File) 
 	{
 		yogaFileName = 'yoga.xml';
+		targetDirectory = 'target';
 		repoList = new Array<String>();
 		
 		var settingsFile : File = settingsDirectory.resolveFile('settings.xml');

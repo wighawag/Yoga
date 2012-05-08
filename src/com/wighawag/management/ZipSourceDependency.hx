@@ -11,12 +11,12 @@ class ZipSourceDependency implements Dependency
 {
 
 	public var url : String;
-	public var srcPath : String;
+	public var srcPathArray : Array<String>;
 	
-	public function new(url : String, srcPath : String) 
+	public function new(url : String, srcPathArray : Array<String>) 
 	{
 		this.url = url;
-		this.srcPath = srcPath;
+		this.srcPathArray = srcPathArray;
 	}
 	
 	/* INTERFACE com.wighawag.management.Dependency */
@@ -61,40 +61,43 @@ class ZipSourceDependency implements Dependency
 		}
 		
 		
-		var srcDirectory : File = null;
-		
-		var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
-		for (file in files)
+		for (srcPath in srcPathArray)
 		{
-			Sys.println(file.nativePath);
-			if (file.isDirectory)
+			var srcDirectory : File = null;
+			
+			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
+			for (file in files)
 			{
-				srcDirectory = file;
-				break;
+				Sys.println(file.nativePath);
+				if (file.isDirectory)
+				{
+					srcDirectory = file;
+					break;
+				}
 			}
-		}
-	
-		if (srcDirectory == null)
-		{
-			srcDirectory = localRepoProjectDirectory.resolveDirectory(srcPath);
-		}
 		
-		if (!srcDirectory.exists)
-		{
-			Sys.println("the srcPath '" + srcDirectory.nativePath + "' does not exist");
-			Sys.exit(1);
-		}
-		
-		var sourceDependency : SourceDependency = new SourceDependency(srcDirectory.nativePath, getUniqueId());
-		if (!dependencySet.contains(sourceDependency))
-		{
-			dependencySet.add(sourceDependency);
+			if (srcDirectory == null)
+			{
+				srcDirectory = localRepoProjectDirectory.resolveDirectory(srcPath);
+			}
+			
+			if (!srcDirectory.exists)
+			{
+				Sys.println("the srcPath '" + srcDirectory.nativePath + "' does not exist");
+				Sys.exit(1);
+			}
+			
+			var sourceDependency : SourceDependency = new SourceDependency(srcDirectory.nativePath, getUniqueId() + srcDirectory.nativePath);
+			if (!dependencySet.contains(sourceDependency))
+			{
+				dependencySet.add(sourceDependency);
+			}
 		}
 	}
 	
 	public function getUniqueId():String 
 	{
-		return "ZipSourceDependency_" + url + "_" + srcPath;
+		return "ZipSourceDependency_" + url;
 	}
 	
 }

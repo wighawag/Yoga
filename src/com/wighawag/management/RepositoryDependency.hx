@@ -68,13 +68,18 @@ class RepositoryDependency implements Dependency
 			Sys.exit(1);
 		}
 		
-		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(dependencyProject.sourceFolder).nativePath, dependencyProject.id);
-		if (!dependencySet.contains(sourceDependency))
+			
+		for (sourceFolder in dependencyProject.sources)
 		{
-			dependencySet.add(sourceDependency);
-		
-			//(+get dependencies if specified (recusrive))
-			dependencyProject.join(settings, dependencySet);
+			
+			var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(sourceFolder).nativePath, dependencyProject.id + '_' + sourceFolder);
+			if (!dependencySet.contains(sourceDependency))
+			{
+				dependencySet.add(sourceDependency);
+			
+				//(+get dependencies if specified (recusrive))
+				dependencyProject.join(settings, dependencySet);
+			}
 		}
 	}
 	

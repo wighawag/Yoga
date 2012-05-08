@@ -4,7 +4,9 @@ package com.wighawag.management;
 
 class YogaProject 
 {
-	public var sourceFolder : String;
+	public var configFiles : Array<ConfigFile>;
+	public var compilerParameters : Array<String>;
+	public var sources : Array<String>;
 	public var mainClass : String;
 	public var targets : Array<Target>;
 	public var dependencies:Array<Dependency>;
@@ -12,6 +14,7 @@ class YogaProject
 	
 	public var id : String;
 	public var version : String;
+	
 	
 	public var shortName(getShortName, null) : String;
 	function getShortName() : String
@@ -41,27 +44,6 @@ class YogaProject
 		}
 		yogaProject.yogaVersion = yogaVersionTag.firstChild().toString();
 		
-		
-		var sourcesTag : Xml = projectTag.elementsNamed("source").next();
-		if (sourcesTag == null)
-		{
-			Sys.println("source folder not specified");
-			Sys.exit(1);
-		}
-		yogaProject.sourceFolder = sourcesTag.firstChild().toString();
-		Sys.println("source : " + yogaProject.sourceFolder);
-		yogaProject.dependencies.push(new SourceDependency(yogaProject.sourceFolder,yogaProject.sourceFolder));
-		
-		var mainTag : Xml = projectTag.elementsNamed("main").next();
-		if (mainTag == null)
-		{
-			Sys.println("main class not specified");
-			Sys.exit(1);
-		}
-		yogaProject.mainClass = mainTag.firstChild().toString();
-		Sys.println("main class : " + yogaProject.mainClass);
-		
-		
 		var idTag : Xml = projectTag.elementsNamed("id").next();
 		if (idTag == null)
 		{
@@ -79,15 +61,72 @@ class YogaProject
 		}
 		yogaProject.version = versionTag.firstChild().toString();
 		
+		
+		
+		var sourcesTag : Xml = projectTag.elementsNamed("sources").next();
+		if (sourcesTag == null)
+		{
+			Sys.println("sources not specified for" + yogaProject.id + '_' + yogaProject.version);
+			Sys.exit(1);
+		}
+		
+		for (sourceXml in sourcesTag.elementsNamed('source'))
+		{
+			var srcPath : String = sourceXml.get('path');
+			yogaProject.sources.push(srcPath);
+			yogaProject.dependencies.push(new SourceDependency(srcPath,srcPath));
+		}
+		
+		if (yogaProject.sources.length == 0)
+		{
+			Sys.println("source paths not specified");
+			Sys.exit(1);
+		}
+		Sys.println("source : " + yogaProject.sources);
+		
+		
+		var mainTag : Xml = projectTag.elementsNamed("main").next();
+		if (mainTag == null)
+		{
+			Sys.println("main class not specified");
+			Sys.exit(1);
+		}
+		yogaProject.mainClass = mainTag.firstChild().toString();
+		Sys.println("main class : " + yogaProject.mainClass);
+		
+		
+		
 		for (targetTag in projectTag.elementsNamed("target"))
 		{
 			var targetName = targetTag.get("name");
-			var targetTemplate = targetTag.get("template");
-			var targetOutput = targetTag.get("output");
+			var targetOutput = targetTag.get("hxml");
 			
-			var target : Target = new Target(targetName, targetTemplate, targetOutput);
+			var target : Target = new Target(targetName, targetOutput);
 			yogaProject.targets.push(target);
 		}
+		
+		
+		
+		var configurationTag : Xml = projectTag.elementsNamed("configuration").next();
+		if (configurationTag != null)
+		{
+			var compilerConfigTag : Xml = configurationTag.elementsNamed("compiler").next();
+			if (compilerConfigTag != null)
+			{
+				for (compilerParam in compilerConfigTag.elementsNamed("param"))
+				{
+					yogaProject.compilerParameters.push(compilerParam.get('line'));
+				}
+			}
+		}
+		
+		for (configFileTag in projectTag.elementsNamed("config-file"))
+		{
+			var configFile : ConfigFile = new ConfigFile(configFileTag.get('template'), configFileTag.get('output'));
+			yogaProject.configFiles.push(configFile);
+		}
+		
+		
 		
 		var dependenciesTag = projectTag.elementsNamed("dependencies").next();
 		if (dependenciesTag != null)
@@ -118,9 +157,29 @@ class YogaProject
 						
 					case "sourcezip" :
 						var sourceZipUrl : String = dependency.get("url");
-						var sourcePath : String = dependency.get("srcpath");
-						Sys.println("zip source " + sourceZipUrl + " " + sourcePath);
-						yogaProject.dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePath));
+						var sourcesTag = dependency.elementsNamed('sources').next();
+						if (sourcesTag == null)
+						{
+							Sys.println("no sources provided");
+							Sys.exit(1);
+						}
+						
+						var sourcePathArray : Array<String> = new Array<String>();
+						
+						for (srcTag in sourcesTag.elementsNamed('source'))
+						{
+							var sourcePath : String = srcTag.get("path");
+							sourcePathArray.push(sourcePath);
+						}
+						
+						if (sourcePathArray.length == 0)
+						{
+							Sys.println("no src path provided");
+							Sys.exit(1);
+						}
+						
+						Sys.println("zip source " + sourceZipUrl + " " + sourcePathArray);
+						yogaProject.dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePathArray));
 				}
 			}
 		}
@@ -129,6 +188,9 @@ class YogaProject
 	
 	private function new() 
 	{
+		configFiles = new Array<ConfigFile>();
+		compilerParameters = new Array<String>();
+		sources = new Array<String>();
 		targets = new Array<Target>();
 		dependencies = new Array<Dependency>();
 	}
@@ -141,3 +203,4 @@ class YogaProject
 		}
 	}
 }
+

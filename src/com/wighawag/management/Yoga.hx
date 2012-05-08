@@ -1,5 +1,6 @@
 package com.wighawag.management;
 import com.wighawag.management.command.ConfigCommand;
+import com.wighawag.util.DateMacro;
 import massive.neko.cmd.CommandLineRunner;
 
 class Yoga extends CommandLineRunner {
@@ -17,8 +18,7 @@ class Yoga extends CommandLineRunner {
 	
 	override function printHeader():Void
 	{
-		// TODO :  macro for copyright
-		print("Yoga - Copyright " + Date.now().getFullYear() + " Wighawag");	
+		print("Yoga - Copyright " + DateMacro.getFullYear() + " Wighawag");	
 	}
 	
 }

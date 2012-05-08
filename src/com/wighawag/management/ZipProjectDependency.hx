@@ -70,14 +70,18 @@ class ZipProjectDependency implements Dependency
 		}
 		
 		var dependencyProject : YogaProject = YogaProject.parse(projectFile.readString());
-		// TODO deal with multiple src folder (other dependency as well)
-		var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(dependencyProject.sourceFolder).nativePath, dependencyProject.id);
-		if (!dependencySet.contains(sourceDependency))
-		{
-			dependencySet.add(sourceDependency);
 		
-			//(+get dependencies if specified (recusrive))
-			dependencyProject.join(settings, dependencySet);
+		for (sourceFolder in dependencyProject.sources)
+		{
+			
+			var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(sourceFolder).nativePath, dependencyProject.id + '_' + sourceFolder);
+			if (!dependencySet.contains(sourceDependency))
+			{
+				dependencySet.add(sourceDependency);
+			
+				//(+get dependencies if specified (recusrive))
+				dependencyProject.join(settings, dependencySet);
+			}
 		}
 	}
 	
