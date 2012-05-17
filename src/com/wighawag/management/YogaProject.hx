@@ -153,7 +153,12 @@ class YogaProject
 						
 					case "zip" :
 						var zipUrl : String = dependency.get("url");
-						yogaProject.dependencies.push(new ZipProjectDependency(zipUrl));
+						var projectPath : String = dependency.get("path");
+						if (projectPath == null)
+						{
+							projectPath = "";
+						}
+						yogaProject.dependencies.push(new ZipProjectDependency(zipUrl, projectPath));
 						
 					case "sourcezip" :
 						var sourceZipUrl : String = dependency.get("url");

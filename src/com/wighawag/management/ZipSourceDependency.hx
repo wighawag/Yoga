@@ -36,12 +36,13 @@ class ZipSourceDependency implements Dependency
 		// TODO extract from ZipProjectDependency and RepositoryDependency and use it here as well
 		
 		
-		var localRepoProjectDirectory : File = settings.localZipSourceRepo.resolveDirectory(StringTools.replace(url.substr(7),"/", "_"));
+		var localRepoProjectDirectory  = settings.localZipProjectRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
 		
 		// check if exist locally
 		if (!localRepoProjectDirectory.exists)
 		{
-			var zipFileName : String = StringTools.replace(url.substr(7),"/", "_");
+			var zipFileName : String = StringTools.replace(url.substr(7), "/", "_");
+			zipFileName = StringTools.replace(zipFileName, ":", "_");
 			var tmpZipFile = settings.localTmp.resolveFile(zipFileName);
 			//if not get it from the repo
 			
