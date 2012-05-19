@@ -7,6 +7,8 @@ class YogaProject
 	public var configFiles : Array<ConfigFile>;
 	public var compilerParameters : Array<String>;
 	public var sources : Array<String>;
+	public var runtimeResources : Array<String>;
+	public var compiletimeResources : Array<String>;
 	public var mainClass : String;
 	public var targets : Array<Target>;
 	public var dependencies:Array<Dependency>;
@@ -94,6 +96,37 @@ class YogaProject
 		yogaProject.mainClass = mainTag.firstChild().toString();
 		Sys.println("main class : " + yogaProject.mainClass);
 		
+		
+		yogaProject.runtimeResources = new Array<String>();
+		var runtimeResourcesTag : Xml = projectTag.elementsNamed("runtime-resources").next();
+		if (runtimeResourcesTag == null)
+		{
+			Sys.println("no runtime resources sspecified for" + yogaProject.id + '_' + yogaProject.version);
+		}
+		
+		for (runtimeResourceXml in runtimeResourcesTag.elementsNamed('resource'))
+		{
+			var resourcePath : String = runtimeResourceXml.get('path');
+			yogaProject.runtimeResources.push(resourcePath);
+		}
+		
+		Sys.println("run time resources : " + yogaProject.runtimeResources);
+		
+		yogaProject.compiletimeResources = new Array<String>();
+		var compiletimeResourcesTag : Xml = projectTag.elementsNamed("compiletime-resources").next();
+		if (compiletimeResourcesTag == null)
+		{
+			Sys.println("no compile time resources specified for" + yogaProject.id + '_' + yogaProject.version);
+		}
+		
+		for (compiletimeResourceXml in compiletimeResourcesTag.elementsNamed('resource'))
+		{
+			var resourcePath : String = compiletimeResourceXml.get('path');
+			yogaProject.compiletimeResources.push(resourcePath);
+		}
+		
+		
+		Sys.println("compile time resources : " + yogaProject.compiletimeResources);
 		
 		
 		for (targetTag in projectTag.elementsNamed("target"))
