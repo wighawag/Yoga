@@ -14,6 +14,7 @@ class YogaSettings
 	public var repoList : Array<String>;
 	public var yogaFileName : String;
 	public var targetDirectory : String;
+	public var deployServer : String;
 	
 	public function new(settingsDirectory : File) 
 	{
@@ -41,6 +42,17 @@ class YogaSettings
 					Sys.println("add repo " + repository.get("url"));
 					repoList.push(repository.get("url"));
 				}
+			}
+			
+			var deployTag : Xml = settingsTag.elementsNamed("deploy-server").next();
+			if (deployTag != null)
+			{
+				Sys.println("deploy address : " + deployTag.get("url"));
+				deployServer = deployTag.get("url");
+			}
+			else
+			{
+				deployServer = null;
 			}
 		}
 		else

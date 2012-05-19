@@ -103,12 +103,16 @@ class YogaProject
 		{
 			Sys.println("no runtime resources sspecified for" + yogaProject.id + '_' + yogaProject.version);
 		}
-		
-		for (runtimeResourceXml in runtimeResourcesTag.elementsNamed('resource'))
+		else
 		{
-			var resourcePath : String = runtimeResourceXml.get('path');
-			yogaProject.runtimeResources.push(resourcePath);
+			for (runtimeResourceXml in runtimeResourcesTag.elementsNamed('resource'))
+			{
+				var resourcePath : String = runtimeResourceXml.get('path');
+				yogaProject.runtimeResources.push(resourcePath);
+			}
 		}
+		
+		
 		
 		Sys.println("run time resources : " + yogaProject.runtimeResources);
 		
@@ -118,11 +122,14 @@ class YogaProject
 		{
 			Sys.println("no compile time resources specified for" + yogaProject.id + '_' + yogaProject.version);
 		}
-		
-		for (compiletimeResourceXml in compiletimeResourcesTag.elementsNamed('resource'))
+		else
 		{
-			var resourcePath : String = compiletimeResourceXml.get('path');
-			yogaProject.compiletimeResources.push(resourcePath);
+			for (compiletimeResourceXml in compiletimeResourcesTag.elementsNamed('resource'))
+			{
+				var resourcePath : String = compiletimeResourceXml.get('path');
+				yogaProject.compiletimeResources.push(resourcePath);
+			}
+		
 		}
 		
 		

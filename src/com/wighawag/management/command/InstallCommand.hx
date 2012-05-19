@@ -34,8 +34,6 @@ class InstallCommand extends DependencyYogaCommand
 			projectFiles.set(srcPath, true);
 		}
 		
-		Sys.println(projectFiles.toString());
-		
 	
 		// copy to use regex first and then delete file that are not necessary
 		var tmpDir : File = yogaSettings.localTmp.resolveDirectory("installing/" + currentProject.id + "_" + currentProject.version, true);
@@ -45,7 +43,6 @@ class InstallCommand extends DependencyYogaCommand
 		for (file in files) 
 		{
 			var currentFileRelativePath : String = tmpDir.getRelativePath(file);
-			Sys.println(currentFileRelativePath);
 			if (!projectFiles.exists(currentFileRelativePath))
 			{
 				if (file.isDirectory)
@@ -60,7 +57,7 @@ class InstallCommand extends DependencyYogaCommand
 		}
 		
 		var installDir : File = yogaSettings.localRepoProjectRepo.resolveDirectory(currentProject.id + "_" + currentProject.version, true);
-		//tmpDir.moveTo(installDir, true);
+		tmpDir.moveTo(installDir, true);
 		
 	}
 	
