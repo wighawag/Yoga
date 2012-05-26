@@ -1,0 +1,17 @@
+::foreach targets::
+# ::name::
+-main TestMain
+-lib munit
+-lib hamcrest
+::foreach haxelibs::
+-lib ::name:::::version::
+::end::
+::foreach srcPaths::
+-cp ::__current__::
+::end::
+--times
+-cp ::testDirectory::
+-::name:: ::testOutputDirectory::/::munitOutput::
+::munitExtra::
+--next
+::end::

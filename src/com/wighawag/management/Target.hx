@@ -5,11 +5,32 @@ class Target
 {
 	public var name:String;
 	public var output:String;
+	public var munitOutput : String;
+	public var munitExtra : String;
 
 	public function new(name : String, output : String) 
 	{
 		this.name = name;
 		this.output = output;
+		
+		
+		// TODO clean that up
+		munitExtra = "";
+		munitOutput = name;
+			
+		if (name == "swf")
+		{
+			munitOutput = "as3_test.swf";
+			munitExtra = "-swf-version 9";
+		}
+		else if (name == "js")
+		{
+			munitOutput = "js_test.js";
+		}
+		else if (name == "neko")
+		{
+			munitOutput = "neko_test.n";
+		}
 		
 	}
 	
@@ -34,5 +55,6 @@ class Target
 			outputHandle.close();
 		}
 	}
+
 	
 }

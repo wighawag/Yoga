@@ -28,45 +28,6 @@ class ConfigFile
 		
 		var outputFile = directory.resolveFile(outputFileName, true);
 		outputFile.writeString(template.execute(new YogaProjectForTemplate(currentProject, dependencySet, yogaSettings)));
-		
-		/*
-		var nmml : Xml = Xml.parse(templateFile.readString());
-		var nmmlProjectTag : Xml = nmml.elementsNamed("project").next();
-		if (nmmlProjectTag == null)
-		{
-			Sys.println("not a valid nmml template, missing project element");
-			Sys.exit(1);
-		}
-		
-		for (nmmlSource in nmmlProjectTag.elementsNamed("source"))
-		{
-			nmmlProjectTag.removeChild(nmmlSource);
-		}
-		
-		for (nmmlHaxelib in nmmlProjectTag.elementsNamed("haxelib"))
-		{
-			nmmlProjectTag.removeChild(nmmlHaxelib);
-		}
-		
-		var nmeDependency : Bool = false;
-		for (dependency in dependencySet.getDependencies())
-		{
-			if (Type.getClass(dependency) == HaxelibDependency)
-			{
-				if (cast(dependency, HaxelibDependency).name == "nme")
-				{
-					nmeDependency = true;
-				}
-			}
-			nmmlProjectTag.addChild(Xml.parse(dependency.getNMMLString()));
-		}
-		if (!nmeDependency)
-		{
-			nmmlProjectTag.addChild(Xml.parse(new HaxelibDependency("nme").getNMMLString()));
-		}
-		
-		outputFile.writeString(nmml.toString());
-		*/
 	}
 	
 }

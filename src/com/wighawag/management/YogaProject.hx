@@ -17,8 +17,12 @@ class YogaProject
 	public var id : String;
 	public var version : String;
 	
+	public var munitVersion : String;
+	public var testDirectory : String;
+	public var testHxmlFile : String;
 	
 	public var shortName(getShortName, null) : String;
+	
 	function getShortName() : String
 	{
 		return id.substr(id.lastIndexOf(".") + 1);
@@ -95,6 +99,37 @@ class YogaProject
 		}
 		yogaProject.mainClass = mainTag.firstChild().toString();
 		Sys.println("main class : " + yogaProject.mainClass);
+		
+		
+		
+		var munitTestTag : Xml = projectTag.elementsNamed("munit-tests").next();
+		if (munitTestTag == null)
+		{
+			Sys.println("test not specified for" + yogaProject.id + '_' + yogaProject.version);
+		}
+		else
+		{
+			yogaProject.munitVersion = munitTestTag.get('version');
+			if (yogaProject.munitVersion == "")
+			{
+				Sys.println("munit version not specified");
+				Sys.exit(1);
+			}
+			
+			yogaProject.testDirectory = munitTestTag.get('path');
+			if (yogaProject.testDirectory == null || yogaProject.testDirectory == "")
+			{
+				Sys.println("test path not specified for " + yogaProject.id + '_' + yogaProject.version);
+				Sys.exit(1);
+			}
+			
+			yogaProject.testHxmlFile = munitTestTag.get('hxml');
+			if (yogaProject.testHxmlFile == null || yogaProject.testHxmlFile == "")
+			{
+				yogaProject.testHxmlFile = "test.hxml";
+			}
+		}
+		
 		
 		
 		yogaProject.runtimeResources = new Array<String>();
