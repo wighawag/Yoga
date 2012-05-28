@@ -1,60 +1,42 @@
 package com.wighawag.management;
-import massive.neko.io.File;
 
 class Target 
 {
-	public var name:String;
-	public var output:String;
-	public var munitOutput : String;
-	public var munitExtra : String;
-
-	public function new(name : String, output : String) 
+	public var name : String;
+	public var extraParameters : Array<String>;
+	
+	public function new(name : String, ?extraParameters : Array<String>) 
 	{
 		this.name = name;
-		this.output = output;
-		
-		
-		// TODO clean that up
-		munitExtra = "";
-		munitOutput = name;
-			
-		if (name == "swf")
-		{
-			munitOutput = "as3_test.swf";
-			munitExtra = "-swf-version 9";
-		}
-		else if (name == "js")
-		{
-			munitOutput = "js_test.js";
-		}
-		else if (name == "neko")
-		{
-			munitOutput = "neko_test.n";
-		}
-		
+		this.extraParameters = extraParameters;
 	}
 	
-	public function generateHxml(directory : File, targetDirectory : File, currentProject : YogaProject, dependencySet : DependencySet) : Void
+	public function getHxmlLines(outputPath:String)  : String
 	{
-		if (output != null && output != '')
+		var result = "";
+		
+		result += "-" + name + " " +  outputPath + "\n";
+		if (extraParameters != null)
 		{
-			var outputFile : File = directory.resolveFile(output, true);
-			var outputHandle = sys.io.File.write(outputFile.nativePath, false);
-			outputHandle.writeString("-" + name + " " + targetDirectory.resolveFile(currentProject.shortName + "_" + currentProject.version + "." + name).nativePath + "\n");
-			outputHandle.writeString("-main " + currentProject.mainClass + "\n");
-			for (dependency in dependencySet.getDependencies())
+			for (parameterLine in extraParameters)
 			{
-				outputHandle.writeString(dependency.getHxmlString() + "\n");
+				result += parameterLine + "\n";
 			}
-			for (param in currentProject.compilerParameters)
-			{
-				outputHandle.writeString(param + "\n");
-			}
-			
-			outputHandle.flush();
-			outputHandle.close();
 		}
+		
+		return result;
 	}
-
+	
+	public function getExtension() : String
+	{
+		switch(name)
+		{
+			case "swf" : return ".swf";
+			case "js" : return ".js";
+			case "neko" : return ".n";
+			case "cpp" : return "_cpp";
+		}
+		return "." + name;
+	}
 	
 }

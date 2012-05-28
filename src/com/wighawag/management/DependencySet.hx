@@ -62,4 +62,14 @@ class DependencySet
 		return dependencies;
 	}
 	
+	public function clone() : DependencySet
+	{
+		var newDependencySet : DependencySet = new DependencySet();
+		for (dependency in dependencies)
+		{
+			newDependencySet.add(dependency);
+		}
+		return newDependencySet;
+	}
+	
 }

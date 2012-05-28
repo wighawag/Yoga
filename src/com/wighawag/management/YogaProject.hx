@@ -20,6 +20,7 @@ class YogaProject
 	public var munitVersion : String;
 	public var testDirectory : String;
 	public var testHxmlFile : String;
+	public var outputPrefix:String;
 	
 	public var shortName(getShortName, null) : String;
 	
@@ -171,14 +172,47 @@ class YogaProject
 		Sys.println("compile time resources : " + yogaProject.compiletimeResources);
 		
 		
-		for (targetTag in projectTag.elementsNamed("target"))
+		
+		var targetsTag : Xml = projectTag.elementsNamed("targets").next();
+		if (targetsTag == null)
 		{
-			var targetName = targetTag.get("name");
-			var targetOutput = targetTag.get("hxml");
-			
-			var target : Target = new Target(targetName, targetOutput);
-			yogaProject.targets.push(target);
+			Sys.println("There is no targets");
+			Sys.exit(1);
 		}
+		else
+		{
+			yogaProject.outputPrefix = targetsTag.get("hxml"); 
+			
+			var counter = 0;
+			for (targetTag in targetsTag.elementsNamed("target"))
+			{
+				var targetName = targetTag.get("name");
+				
+				
+				var extraParams : Array<String> = new Array<String>();
+				for (paramlineTag in targetTag.elementsNamed("param"))
+				{
+					var param = paramlineTag.get("line");
+					extraParams.push(param);
+				}
+				
+				
+				var target : Target = new Target(targetName, extraParams);
+				
+				yogaProject.targets.push(target);		
+				
+				counter ++;
+			}
+			if (counter == 0)
+			{
+				Sys.println("There is no targets specified");
+				Sys.exit(1);
+			}
+		}
+		
+		
+		
+		
 		
 		
 		

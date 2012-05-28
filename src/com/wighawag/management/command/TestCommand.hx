@@ -1,12 +1,15 @@
 package com.wighawag.management.command;
 import com.wighawag.management.DependencySet;
 import com.wighawag.management.HaxelibDependency;
+import com.wighawag.management.HXMLGenerator;
+import com.wighawag.management.Output;
 import com.wighawag.management.SourceDependency;
 import com.wighawag.management.Target;
 import com.wighawag.management.YogaProject;
 import com.wighawag.management.YogaSettings;
 import haxe.Template;
 import massive.neko.io.File;
+import sys.io.Process;
 
 
 class TestCommand extends DependencyYogaCommand
@@ -17,7 +20,7 @@ class TestCommand extends DependencyYogaCommand
 	public function new()
 	{
 		super();
-		munitTemplate = "version=::version::\nsrc=::testDirectory::\nbin=::testOutputDirectory::\nreport=::testReportDirectory::\nhxml=::testHxmlFile::\nclassPaths=::foreach srcPaths::::__current__::,::end::\n";
+		//munitTemplate = "version=::version::\nsrc=::testDirectory::\nbin=::testOutputDirectory::\nreport=::testReportDirectory::\nhxml=::testHxmlFile::\nclassPaths=::foreach srcPaths::::__current__::,::end::\n";
 		
 		
 	}
@@ -34,16 +37,6 @@ class TestCommand extends DependencyYogaCommand
 		
 		var munitConfig : MunitConfig = new MunitConfig(currentProject, dependencySet, yogaSettings);
 		
-		/*
-		var template : Template;
-		 
-		template = new Template(munitTemplate);
-		var munitFile : File = console.dir.resolveFile('.munit', true);
-		
-		munitFile.writeString(template.execute(munitConfig));
-		*/
-		
-		
 		
 		var testHxmlFile : File = console.dir.resolveFile(munitConfig.testHxmlFile);
 		testHxmlFile.deleteFile();
@@ -56,16 +49,53 @@ class TestCommand extends DependencyYogaCommand
 		paths = paths.substr(0, paths.length -1);
 		Sys.command("haxelib", ["run", "munit", "config", "-reset" , "-src", munitConfig.testDirectory, "-bin", munitConfig.testOutputDirectory, "-report", munitConfig.testReportDirectory, "-hxml", munitConfig.testHxmlFile, "-classPaths", paths]);
 		
+
+		var outputs : Array<Output> = new Array<Output>();
 		
-		// TODO clean that up
-		var testHxmlTemplateFile : File = console.originalDir.resolveFile("test.hxml.template");
-		var testHxmlTemplate : String = testHxmlTemplateFile.readString();
-		var hxmlTemplate : Template = new Template(testHxmlTemplate);
-		var final = hxmlTemplate.execute(munitConfig);
-		final = final.substr(0, final.lastIndexOf("--next"));
-		testHxmlFile.writeString(final);
+		for (target in currentProject.targets)
+		{
+			if (target.name == "cpp")
+			{
+				continue; // skop cpp as it is not supported by munit
+			}
+			var outputFileName = target.name + "_test";
+			switch(target.name)
+			{
+				case "swf" : outputFileName = "as3_test.swf";
+				case "neko" : outputFileName = "neko_test.n";
+				case "js" : outputFileName = "js_test.js";
+			}
 		
-		Sys.command("haxelib", ["run", "munit", "test"]);
+			outputs.push(new Output(outputFileName, target));
+		}
+		
+		var testOutputDirectory = console.dir.resolveDirectory(munitConfig.testOutputDirectory);
+		
+		var testDependencySet = dependencySet.clone();
+		testDependencySet.add(new HaxelibDependency("hamcrest"));
+		testDependencySet.add(new HaxelibDependency("munit"));
+		//var testPath = console.dir.resolveDirectory(currentProject.testDirectory).nativePath;
+		testDependencySet.add(new SourceDependency(currentProject.testDirectory, currentProject.testDirectory));
+		var hxml = HXMLGenerator.generate(testOutputDirectory, outputs, testDependencySet, currentProject.compilerParameters, "TestMain");
+		
+		
+		testHxmlFile.writeString(hxml);
+		
+		
+		//Sys.command("haxe", [console.dir.getRelativePath(testHxmlFile)]);
+		
+		var munitRunProcess = new Process("haxelib", ["run", "munit", "test"]);
+		var output = munitRunProcess.stdout.readAll().toString();
+		//var errorOutput = munitRunProcess.stderr.readAll().toString();
+		
+		// TODO : if failure stop and 
+		
+		Sys.println(output);
+		//Sys.println("ERROR :" + errorOutput);
+		
+		//Sys.command("haxelib", ["run", "munit", "run"]);
+		
+		//Sys.command("haxelib", ["run", "munit", "test"]);
 	}
 	
 }

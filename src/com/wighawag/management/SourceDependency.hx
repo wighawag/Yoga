@@ -10,6 +10,10 @@ class SourceDependency implements Dependency
 	public function new(path : String, uniqueId : String) 
 	{
 		_uniqueId = uniqueId;
+		if (path.charAt(path.length - 1) == "\\")
+		{
+			path = path.substr(0, path.length -1);
+		}
 		this.path = path;
 	}
 	

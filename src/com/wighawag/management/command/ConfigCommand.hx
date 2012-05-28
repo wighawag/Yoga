@@ -1,4 +1,6 @@
 package com.wighawag.management.command;
+import com.wighawag.management.HXMLGenerator;
+import com.wighawag.management.Output;
 import massive.neko.io.File;
 
 class ConfigCommand extends DependencyYogaCommand
@@ -18,10 +20,17 @@ class ConfigCommand extends DependencyYogaCommand
 		
 		targetDirectory = console.dir.resolveDirectory(yogaSettings.targetDirectory, true);
 		
+		
 		for (target in currentProject.targets)
 		{
-			target.generateHxml(console.dir,targetDirectory,currentProject,dependencySet);
+			var outputs : Array<Output> = new Array<Output>();
+			outputs.push(new Output(currentProject.shortName + "_" + currentProject.version + target.getExtension(), target));
+			
+			var hxml = HXMLGenerator.generate(targetDirectory, outputs, dependencySet, currentProject.compilerParameters, currentProject.mainClass);
+			var hxmlFile = console.dir.resolveFile(currentProject.outputPrefix + "_" + target.name + ".hxml", true);
+			hxmlFile.writeString(hxml);
 		}
+		
 		
 		
 		for (configFile in currentProject.configFiles)
