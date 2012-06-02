@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project>
+	<yoga-version>1</yoga-version>
+	
+	<id>com.wighawag.management.ManagenmentTest</id>
+	<version>0.1</version>
+	
+	<defaultTarget>swf</defaultTarget>
+	
+	<dependencies>
+		<haxelib name="hxJson2" version="1" />
+		<haxelib name="polygonal" version="1.20" />
+		<repository id="" version="" />
+		<zip url="" />
+		<git url="" tag="" />
+		<svn url="" tag="" />
+	</dependencies>
+</project>

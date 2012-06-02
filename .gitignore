@@ -1,3 +1,8 @@
 package.zip
 package/
-yoga.xml
+*.hxproj
+*.sln
+*.userprefs
+*.hxml
+target/
+
