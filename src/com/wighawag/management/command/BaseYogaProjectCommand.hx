@@ -24,7 +24,7 @@ class BaseYogaProjectCommand extends BaseYogaSettingsCommand
 		
 		var content = currentProjectFile.readString();
 		
-		currentProject = YogaProject.parse(content);
+		currentProject = new YogaProject(content);
 		
 		
 		Sys.println("******* This project use yoga version " + currentProject.yogaVersion + " *********");

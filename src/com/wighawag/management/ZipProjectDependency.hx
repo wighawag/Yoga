@@ -97,7 +97,7 @@ class ZipProjectDependency implements Dependency
 		}
 		
 		
-		var dependencyProject : YogaProject = YogaProject.parse(projectFile.readString());
+		var dependencyProject : YogaProject = new YogaProject(projectFile.readString());
 		
 		for (sourceFolder in dependencyProject.sources)
 		{

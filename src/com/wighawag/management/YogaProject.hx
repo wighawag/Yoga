@@ -29,9 +29,14 @@ class YogaProject
 		return id.substr(id.lastIndexOf(".") + 1);
 	}
 
-	static public function parse(content : String) : YogaProject
+	public function new(content : String)
 	{
-		var yogaProject : YogaProject = new YogaProject();
+		configFiles = new Array<ConfigFile>();
+		compilerParameters = new Array<String>();
+		sources = new Array<String>();
+		targets = new Array<Target>();
+		dependencies = new Array<Dependency>();
+		
 		
 		var xml = Xml.parse(content);
 		
@@ -49,7 +54,7 @@ class YogaProject
 			Sys.println("no yoga-version element found");
 			Sys.exit(1);
 		}
-		yogaProject.yogaVersion = yogaVersionTag.firstChild().toString();
+		yogaVersion = yogaVersionTag.firstChild().toString();
 		
 		var idTag : Xml = projectTag.elementsNamed("id").next();
 		if (idTag == null)
@@ -57,7 +62,7 @@ class YogaProject
 			Sys.println("id not specified");
 			Sys.exit(1);
 		}
-		yogaProject.id = idTag.firstChild().toString();
+		id = idTag.firstChild().toString();
 		
 		
 		var versionTag : Xml = projectTag.elementsNamed("version").next();
@@ -66,30 +71,30 @@ class YogaProject
 			Sys.println("project version not specified");
 			Sys.exit(1);
 		}
-		yogaProject.version = versionTag.firstChild().toString();
+		version = versionTag.firstChild().toString();
 		
 		
 		
 		var sourcesTag : Xml = projectTag.elementsNamed("sources").next();
 		if (sourcesTag == null)
 		{
-			Sys.println("sources not specified for" + yogaProject.id + '_' + yogaProject.version);
+			Sys.println("sources not specified for" + id + '_' + version);
 			Sys.exit(1);
 		}
 		
 		for (sourceXml in sourcesTag.elementsNamed('source'))
 		{
 			var srcPath : String = sourceXml.get('path');
-			yogaProject.sources.push(srcPath);
-			yogaProject.dependencies.push(new SourceDependency(srcPath,srcPath));
+			sources.push(srcPath);
+			dependencies.push(new SourceDependency(srcPath,srcPath));
 		}
 		
-		if (yogaProject.sources.length == 0)
+		if (sources.length == 0)
 		{
 			Sys.println("source paths not specified");
 			Sys.exit(1);
 		}
-		Sys.println("source : " + yogaProject.sources);
+		Sys.println("source : " + sources);
 		
 		
 		var mainTag : Xml = projectTag.elementsNamed("main").next();
@@ -98,78 +103,78 @@ class YogaProject
 			Sys.println("main class not specified");
 			Sys.exit(1);
 		}
-		yogaProject.mainClass = mainTag.firstChild().toString();
-		Sys.println("main class : " + yogaProject.mainClass);
+		mainClass = mainTag.firstChild().toString();
+		Sys.println("main class : " + mainClass);
 		
 		
 		
 		var munitTestTag : Xml = projectTag.elementsNamed("munit-tests").next();
 		if (munitTestTag == null)
 		{
-			Sys.println("test not specified for" + yogaProject.id + '_' + yogaProject.version);
+			Sys.println("test not specified for" + id + '_' + version);
 		}
 		else
 		{
-			yogaProject.munitVersion = munitTestTag.get('version');
-			if (yogaProject.munitVersion == "")
+			munitVersion = munitTestTag.get('version');
+			if (munitVersion == "")
 			{
 				Sys.println("munit version not specified");
 				Sys.exit(1);
 			}
 			
-			yogaProject.testDirectory = munitTestTag.get('path');
-			if (yogaProject.testDirectory == null || yogaProject.testDirectory == "")
+			testDirectory = munitTestTag.get('path');
+			if (testDirectory == null || testDirectory == "")
 			{
-				Sys.println("test path not specified for " + yogaProject.id + '_' + yogaProject.version);
+				Sys.println("test path not specified for " + id + '_' + version);
 				Sys.exit(1);
 			}
 			
-			yogaProject.testHxmlFile = munitTestTag.get('hxml');
-			if (yogaProject.testHxmlFile == null || yogaProject.testHxmlFile == "")
+			testHxmlFile = munitTestTag.get('hxml');
+			if (testHxmlFile == null || testHxmlFile == "")
 			{
-				yogaProject.testHxmlFile = "test.hxml";
+				testHxmlFile = "test.hxml";
 			}
 		}
 		
 		
 		
-		yogaProject.runtimeResources = new Array<String>();
+		runtimeResources = new Array<String>();
 		var runtimeResourcesTag : Xml = projectTag.elementsNamed("runtime-resources").next();
 		if (runtimeResourcesTag == null)
 		{
-			Sys.println("no runtime resources sspecified for" + yogaProject.id + '_' + yogaProject.version);
+			Sys.println("no runtime resources sspecified for" + id + '_' + version);
 		}
 		else
 		{
 			for (runtimeResourceXml in runtimeResourcesTag.elementsNamed('resource'))
 			{
 				var resourcePath : String = runtimeResourceXml.get('path');
-				yogaProject.runtimeResources.push(resourcePath);
+				runtimeResources.push(resourcePath);
 			}
 		}
 		
 		
 		
-		Sys.println("run time resources : " + yogaProject.runtimeResources);
+		Sys.println("run time resources : " + runtimeResources);
 		
-		yogaProject.compiletimeResources = new Array<String>();
+		compiletimeResources = new Array<String>();
 		var compiletimeResourcesTag : Xml = projectTag.elementsNamed("compiletime-resources").next();
 		if (compiletimeResourcesTag == null)
 		{
-			Sys.println("no compile time resources specified for" + yogaProject.id + '_' + yogaProject.version);
+			Sys.println("no compile time resources specified for" + id + '_' + version);
 		}
 		else
 		{
 			for (compiletimeResourceXml in compiletimeResourcesTag.elementsNamed('resource'))
 			{
 				var resourcePath : String = compiletimeResourceXml.get('path');
-				yogaProject.compiletimeResources.push(resourcePath);
+				compiletimeResources.push(resourcePath);
 			}
 		
 		}
 		
 		
-		Sys.println("compile time resources : " + yogaProject.compiletimeResources);
+		Sys.println("compile time resources : " + compiletimeResources);
 		
 		
 		
@@ -181,7 +186,7 @@ class YogaProject
 		}
 		else
 		{
-			yogaProject.outputPrefix = targetsTag.get("hxml"); 
+			outputPrefix = targetsTag.get("hxml"); 
 			
 			var counter = 0;
 			for (targetTag in targetsTag.elementsNamed("target"))
@@ -199,7 +204,7 @@ class YogaProject
 				
 				var target : Target = new Target(targetName, extraParams);
 				
-				yogaProject.targets.push(target);		
+				targets.push(target);		
 				
 				counter ++;
 			}
@@ -224,7 +229,7 @@ class YogaProject
 			{
 				for (compilerParam in compilerConfigTag.elementsNamed("param"))
 				{
-					yogaProject.compilerParameters.push(compilerParam.get('line'));
+					compilerParameters.push(compilerParam.get('line'));
 				}
 			}
 		}
@@ -232,7 +237,7 @@ class YogaProject
 		for (configFileTag in projectTag.elementsNamed("config-file"))
 		{
 			var configFile : ConfigFile = new ConfigFile(configFileTag.get('template'), configFileTag.get('output'));
-			yogaProject.configFiles.push(configFile);
+			configFiles.push(configFile);
 		}
 		
 		
@@ -251,14 +256,14 @@ class YogaProject
 						var libraryName : String = dependency.get("name");
 						var version : String = dependency.get("version");
 						
-						yogaProject.dependencies.push(new HaxelibDependency(libraryName, version));
+						dependencies.push(new HaxelibDependency(libraryName, version));
 						
 						
 					case "repository" :
 						var repoProjectId : String = dependency.get("id");
 						var repoProjectVersion : String = dependency.get("version");
 						
-						yogaProject.dependencies.push(new RepositoryDependency(repoProjectId, repoProjectVersion));
+						dependencies.push(new RepositoryDependency(repoProjectId, repoProjectVersion));
 						
 					case "zip" :
 						var zipUrl : String = dependency.get("url");
@@ -267,7 +272,7 @@ class YogaProject
 						{
 							projectPath = "";
 						}
-						yogaProject.dependencies.push(new ZipProjectDependency(zipUrl, projectPath));
+						dependencies.push(new ZipProjectDependency(zipUrl, projectPath));
 						
 					case "sourcezip" :
 						var sourceZipUrl : String = dependency.get("url");
@@ -293,20 +298,10 @@ class YogaProject
 						}
 						
 						Sys.println("zip source " + sourceZipUrl + " " + sourcePathArray);
-						yogaProject.dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePathArray));
+						dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePathArray));
 				}
 			}
 		}
-		return yogaProject;
-	}
-	
-	private function new() 
-	{
-		configFiles = new Array<ConfigFile>();
-		compilerParameters = new Array<String>();
-		sources = new Array<String>();
-		targets = new Array<Target>();
-		dependencies = new Array<Dependency>();
 	}
 	
 	public function join(yogaSettings : YogaSettings, dependencySet : DependencySet) : Void

@@ -60,7 +60,7 @@ class RepositoryDependency implements Dependency
 			Sys.exit(1);
 		}
 		
-		var dependencyProject : YogaProject = YogaProject.parse(projectFile.readString());
+		var dependencyProject : YogaProject = new YogaProject(projectFile.readString());
 		
 		if (id != dependencyProject.id)
 		{

@@ -37,6 +37,7 @@ class TestCommand extends DependencyYogaCommand
 		
 		var munitConfig : MunitConfig = new MunitConfig(currentProject, dependencySet, yogaSettings);
 		
+		//TODO delete .munit file
 		
 		var testHxmlFile : File = console.dir.resolveFile(munitConfig.testHxmlFile);
 		testHxmlFile.deleteFile();
@@ -82,7 +83,7 @@ class TestCommand extends DependencyYogaCommand
 		testHxmlFile.writeString(hxml);
 		
 		
-		//Sys.command("haxe", [console.dir.getRelativePath(testHxmlFile)]);
+		// TODO : patch or rewrite the TestMain.hx so that it use an TextOutput
 		
 		var munitRunProcess = new Process("haxelib", ["run", "munit", "test"]);
 		var output = munitRunProcess.stdout.readAll().toString();
