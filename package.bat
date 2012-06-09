@@ -1,6 +1,7 @@
 @echo off
 copy src\haxelib.xml package\haxelib.xml
-copy test.hxml.template package\test.hxml.template
+copy src\yoga.sh package\yoga.sh
+copy src\yoga.bat package\yoga.bat
 cd package
-"C:\Program Files\7-Zip\7z.exe" a ..\package.zip haxelib.xml run.n test.hxml.template
+"C:\Program Files\7-Zip\7z.exe" a ..\package.zip haxelib.xml run.n yoga.bat yoga.sh 
 haxelib test ..\package.zip
