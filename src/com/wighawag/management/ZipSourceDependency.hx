@@ -33,9 +33,6 @@ class ZipSourceDependency implements Dependency
 	
 	public function grab(settings:YogaSettings, dependencySet:DependencySet):Void 
 	{
-		// TODO extract from ZipProjectDependency and RepositoryDependency and use it here as well
-		
-		
 		var localRepoProjectDirectory  = settings.localZipSourceRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
 		
 		// check if exist locally
@@ -46,16 +43,12 @@ class ZipSourceDependency implements Dependency
 			var tmpZipFile = settings.localTmp.resolveFile(zipFileName);
 			//if not get it from the repo
 			
+			Show.message("Downloading " + url);
 			var got : Bool = ZipExtractor.getZip(tmpZipFile.nativePath , url);
 			if (!got)
 			{
 				Show.criticalError("cannot download " + url);
 			}
-				
-			//Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
-			
-			//then unzip 
-			//Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory.nativePath);
 			
 			ZipExtractor.extract(tmpZipFile.nativePath, localRepoProjectDirectory.nativePath);
 		}
@@ -68,7 +61,6 @@ class ZipSourceDependency implements Dependency
 			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
 			for (file in files)
 			{
-				//Sys.println(file.nativePath);
 				if (file.isDirectory)
 				{
 					srcDirectory = file;

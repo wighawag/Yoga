@@ -95,10 +95,9 @@ class YogaProject
 		if (mainTag == null)
 		{
 			// TODO this should be optional
-			Show.criticalError("main class not specified");
+			Show.criticalError("main class not specified (currenlty does not support project without main class)");
 		}
 		mainClass = mainTag.firstChild().toString();
-		//Sys.println("main class : " + mainClass);
 		
 		
 		

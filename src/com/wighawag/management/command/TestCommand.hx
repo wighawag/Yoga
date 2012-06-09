@@ -90,12 +90,7 @@ class TestCommand extends DependencyYogaCommand
 		
 		var munitRunProcess = new Process("haxelib", ["run", "munit", "test"]);
 		var output = munitRunProcess.stdout.readAll().toString();
-		//var errorOutput = munitRunProcess.stderr.readAll().toString();
 		
-		// TODO : if failure stop and 
-		
-		//Sys.println(output);
-
 		//PLATFORMS TESTED: 2, PASSED: 0, FAILED: 2, ERRORS: 0, TIME: 1.13492
 		var resultLine = output.substr(output.indexOf("PLATFORMS TESTED:"));
 		resultLine = resultLine.substr(0,resultLine.indexOf("\n"));
