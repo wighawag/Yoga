@@ -8,6 +8,8 @@ import neko.zip.Writer;
 import sys.FileSystem;
 import sys.io.File;
 
+import com.wighawag.util.Show;
+
 typedef FileZipEntry = {
 	var fileTime : Date;
 	var fileName : String;
@@ -87,8 +89,7 @@ class ZipExtractor
 					}
 					catch (e: Dynamic)
 					{
-						Sys.println('error while creating ' + dirPath + '  ' + filePath);
-						Sys.exit(1);
+						Show.criticalError('failed creating ' + dirPath + '  ' + filePath);
 					}
 				}
 
@@ -103,7 +104,7 @@ class ZipExtractor
 	
 	static public function getZipFromAnyRepositories(destinationFolder : String, repoList : Array<String>, repoProjectId : String, repoProjectVersion : String) : String
 	{
-		Sys.println("attemtping to get " + repoProjectId + " : " + repoProjectVersion + " from " + repoList);
+		Show.message("attemtping to get " + repoProjectId + " : " + repoProjectVersion + " from " + repoList);
 		var repoQueue : Array<String> = repoList.copy();
 		var tmpZip :String = null;
 		var got : Bool = false;
@@ -133,21 +134,20 @@ class ZipExtractor
 			if (status == 302)
 			{
 				newLocation = h.responseHeaders.get("Location");
-				Sys.println("redirect to " +  newLocation);
 			}
 		}
 		h.onError = function(e) {
 			errorHapenned = true;
 		};
-		Sys.println("Downloading " + remoteZip + " to " + destinationZip);
+		//Sys.println("Downloading " + remoteZip + " to " + destinationZip);
 		try{
 			h.customRequest(false, tmpOut);
 		}catch (e : Dynamic)
 		{
-			Sys.println('error : ' + e.toString());
+			//Sys.println('error : ' + e.toString());
 			if (newLocation != null)
 			{
-				Sys.println("redirection");
+				Show.message("redirection : " + newLocation);
 			}
 			FileSystem.deleteFile(destinationZip);
 			errorHapenned = true;
@@ -158,7 +158,7 @@ class ZipExtractor
 			return getZip(destinationZip, newLocation);
 		}
 		
-		Sys.println("request done");
+		//Sys.println("request done");
 		return !errorHapenned;
 	}
 	

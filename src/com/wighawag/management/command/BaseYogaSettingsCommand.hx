@@ -3,7 +3,7 @@ import com.wighawag.management.YogaSettings;
 import haxe.io.Path;
 import massive.neko.cmd.Command;
 import massive.neko.io.File;
-
+import com.wighawag.util.Show;
 
 class BaseYogaSettingsCommand extends Command
 {
@@ -31,8 +31,9 @@ class BaseYogaSettingsCommand extends Command
 		}
 		else
 		{
-			Sys.println("no Environment variable defined for finding the yoga folder, please set YOGA_FOLDER to the path you want yoga to store its local repo and settings");
-			Sys.exit(1);
+			Show.criticalError("no Environment variable defined for finding the yoga folder." +
+			"\nPlease set YOGA_FOLDER to the path you want yoga to store its local repo and settings" +
+			"\nor set HOME or USERPROFILE environement variable to your home folder where yoga will create a directory");
 		}
 		
 		var settingsDirectory : File = null;
@@ -42,24 +43,22 @@ class BaseYogaSettingsCommand extends Command
 		}
 		catch (e : Dynamic)
 		{
-			Sys.println("error for " + settingsFolderPath);
-			Sys.exit(1);
+			Show.criticalError("no possible to access " + settingsFolderPath);
 		}
-		
-		Sys.println("local yoga folder " + settingsDirectory.toString());
 		
 		if (!settingsDirectory.exists)
 		{
-			Sys.println("creating folder " + settingsDirectory.toString() + " ...");
+			//Sys.println("creating folder " + settingsDirectory.toString() + " ...");
 			try
 			{
 				settingsDirectory.createDirectory();
 			} catch (e : Dynamic)
 			{
-				Sys.println("error while creating the directory " + e + " , you might need to create manuually at " + settingsFolderPath);
-				Sys.exit(1);
+				Show.criticalError("creating the directory " + e + " , you might need to create manually at " + settingsFolderPath);
 			}
 		}
+		
+		Show.message("yoga folder : " + settingsDirectory.nativePath);
 		
 		yogaSettings = new YogaSettings(settingsDirectory);
 	}

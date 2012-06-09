@@ -5,6 +5,7 @@ import com.wighawag.management.YogaSettings;
 import com.wighawag.system.SystemUtil;
 import massive.neko.io.File;
 import sys.FileSystem;
+import com.wighawag.util.Show;
 
 class ZipProjectDependency implements Dependency
 {
@@ -16,8 +17,7 @@ class ZipProjectDependency implements Dependency
 	{
 		if (url.substr(0, 7) != "http://")
 		{
-			Sys.println("invalid url need to start with http://");
-			Sys.exit(1);
+			Show.criticalError("invalid url need to start with http://");
 		}
 		this.url = url;
 		this.path = path;
@@ -53,14 +53,13 @@ class ZipProjectDependency implements Dependency
 			var got : Bool = ZipExtractor.getZip(tmpZipFile.nativePath , url);
 			if (!got)
 			{
-				Sys.println("cannot download " + url);
-				Sys.exit(1);
+				Show.criticalError("cannot download " + url);
 			}
 				
-			Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
+			//Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
 			
 			//then unzip 
-			Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory);
+			//Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory);
 			ZipExtractor.extract(tmpZipFile.nativePath, localRepoProjectDirectory.nativePath);
 		}
 		
@@ -75,7 +74,7 @@ class ZipProjectDependency implements Dependency
 			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(path, ""));
 			for (file in files)
 			{
-				Sys.println(file.nativePath);
+				//Sys.println(file.nativePath);
 				if (!file.isDirectory)
 				{
 					projectFile = file;
@@ -92,8 +91,7 @@ class ZipProjectDependency implements Dependency
 		
 		if (!projectFile.exists)
 		{
-			Sys.println("the project file '" + projectFile.nativePath + "' does not exist");
-			Sys.exit(1);
+			Show.criticalError("the project file '" + projectFile.nativePath + "' does not exist");
 		}
 		
 		

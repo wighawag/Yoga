@@ -3,6 +3,7 @@ import com.wighawag.format.zip.ZipExtractor;
 import haxe.Http;
 import massive.neko.io.File;
 import massive.neko.util.ZipUtil;
+import com.wighawag.util.Show;
 
 class DeployCommand extends InstallCommand
 {
@@ -18,8 +19,7 @@ class DeployCommand extends InstallCommand
 		
 		if (yogaSettings.deployServer == null)
 		{
-			Sys.println("no deploy server specified in settings.xml");
-			Sys.exit(1);
+			Show.criticalError("no deploy server specified in settings.xml");
 		}
 		
 		var projectFileName : String = currentProject.id + "_" + currentProject.version;
@@ -32,12 +32,18 @@ class DeployCommand extends InstallCommand
 		ZipExtractor.compress(repoFolder.nativePath, zipFile.nativePath);
 		
 		var http : Http = new Http(yogaSettings.deployServer);
-		http.onError = function(e) { Sys.println(e); Sys.exit(1); };
-		http.onData = function(msg : String):Void { Sys.println(msg); };
+		
+		http.onError = function(e) {
+			Show.criticalError(e); 
+		};
+		
+		http.onData = function(msg : String):Void { 
+			//Sys.println(msg); 
+		};
 		
 		var data = sys.io.File.getBytes(zipFile.nativePath);
 		http.fileTransfert("file", zipFile.fileName, new ProgressIn(new haxe.io.BytesInput(data), data.length), data.length);
-		Sys.println("Sending data.... ");
+		Show.message("Sending data.... ");
 		http.request(true);
 		
 		zipFile.deleteFile();

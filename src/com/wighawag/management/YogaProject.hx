@@ -1,5 +1,5 @@
 package com.wighawag.management;
-
+import com.wighawag.util.Show;
 
 
 class YogaProject 
@@ -44,23 +44,20 @@ class YogaProject
 		
 		if (projectTag == null)
 		{
-			Sys.println("no project element found");
-			Sys.exit(1);
+			Show.criticalError("no project element found");
 		}
 		
 		var yogaVersionTag = projectTag.elementsNamed("yoga-version").next();
 		if (yogaVersionTag == null)
 		{
-			Sys.println("no yoga-version element found");
-			Sys.exit(1);
+			Show.criticalError("no yoga-version element found");
 		}
 		yogaVersion = yogaVersionTag.firstChild().toString();
 		
 		var idTag : Xml = projectTag.elementsNamed("id").next();
 		if (idTag == null)
 		{
-			Sys.println("id not specified");
-			Sys.exit(1);
+			Show.criticalError("id not specified");
 		}
 		id = idTag.firstChild().toString();
 		
@@ -68,8 +65,7 @@ class YogaProject
 		var versionTag : Xml = projectTag.elementsNamed("version").next();
 		if (versionTag == null)
 		{
-			Sys.println("project version not specified");
-			Sys.exit(1);
+			Show.criticalError("project version not specified");
 		}
 		version = versionTag.firstChild().toString();
 		
@@ -78,8 +74,7 @@ class YogaProject
 		var sourcesTag : Xml = projectTag.elementsNamed("sources").next();
 		if (sourcesTag == null)
 		{
-			Sys.println("sources not specified for" + id + '_' + version);
-			Sys.exit(1);
+			Show.criticalError("sources not specified for" + id + '_' + version);
 		}
 		
 		for (sourceXml in sourcesTag.elementsNamed('source'))
@@ -91,42 +86,40 @@ class YogaProject
 		
 		if (sources.length == 0)
 		{
-			Sys.println("source paths not specified");
-			Sys.exit(1);
+			Show.criticalError("source paths not specified");
 		}
-		Sys.println("source : " + sources);
+		//Sys.println("source : " + sources);
 		
 		
 		var mainTag : Xml = projectTag.elementsNamed("main").next();
 		if (mainTag == null)
 		{
-			Sys.println("main class not specified");
-			Sys.exit(1);
+			// TODO this should be optional
+			Show.criticalError("main class not specified");
 		}
 		mainClass = mainTag.firstChild().toString();
-		Sys.println("main class : " + mainClass);
+		//Sys.println("main class : " + mainClass);
 		
 		
 		
 		var munitTestTag : Xml = projectTag.elementsNamed("munit-tests").next();
 		if (munitTestTag == null)
 		{
-			Sys.println("test not specified for" + id + '_' + version);
+			Show.message("test not specified for" + id + '_' + version);
 		}
 		else
 		{
+			// TODO make version useful , for now it does not have any effect
 			munitVersion = munitTestTag.get('version');
 			if (munitVersion == "")
 			{
-				Sys.println("munit version not specified");
-				Sys.exit(1);
+				Show.criticalError("munit version not specified");
 			}
 			
 			testDirectory = munitTestTag.get('path');
 			if (testDirectory == null || testDirectory == "")
 			{
-				Sys.println("test path not specified for " + id + '_' + version);
-				Sys.exit(1);
+				Show.criticalError("test path not specified for " + id + '_' + version);
 			}
 			
 			testHxmlFile = munitTestTag.get('hxml');
@@ -142,7 +135,7 @@ class YogaProject
 		var runtimeResourcesTag : Xml = projectTag.elementsNamed("runtime-resources").next();
 		if (runtimeResourcesTag == null)
 		{
-			Sys.println("no runtime resources sspecified for" + id + '_' + version);
+			Show.message("no runtime resources sspecified for" + id + '_' + version);
 		}
 		else
 		{
@@ -155,13 +148,13 @@ class YogaProject
 		
 		
 		
-		Sys.println("run time resources : " + runtimeResources);
+		//Sys.println("run time resources : " + runtimeResources);
 		
 		compiletimeResources = new Array<String>();
 		var compiletimeResourcesTag : Xml = projectTag.elementsNamed("compiletime-resources").next();
 		if (compiletimeResourcesTag == null)
 		{
-			Sys.println("no compile time resources specified for" + id + '_' + version);
+			Show.message("no compile time resources specified for" + id + '_' + version);
 		}
 		else
 		{
@@ -174,15 +167,14 @@ class YogaProject
 		}
 		
 		
-		Sys.println("compile time resources : " + compiletimeResources);
+		//Sys.println("compile time resources : " + compiletimeResources);
 		
 		
 		
 		var targetsTag : Xml = projectTag.elementsNamed("targets").next();
 		if (targetsTag == null)
 		{
-			Sys.println("There is no targets");
-			Sys.exit(1);
+			Show.criticalError("There is no targets");
 		}
 		else
 		{
@@ -210,8 +202,7 @@ class YogaProject
 			}
 			if (counter == 0)
 			{
-				Sys.println("There is no targets specified");
-				Sys.exit(1);
+				Show.criticalError("There is no targets specified");
 			}
 		}
 		
@@ -279,8 +270,7 @@ class YogaProject
 						var sourcesTag = dependency.elementsNamed('sources').next();
 						if (sourcesTag == null)
 						{
-							Sys.println("no sources provided");
-							Sys.exit(1);
+							Show.criticalError("no sources provided");
 						}
 						
 						var sourcePathArray : Array<String> = new Array<String>();
@@ -293,11 +283,10 @@ class YogaProject
 						
 						if (sourcePathArray.length == 0)
 						{
-							Sys.println("no src path provided");
-							Sys.exit(1);
+							Show.criticalError("no src path provided");
 						}
 						
-						Sys.println("zip source " + sourceZipUrl + " " + sourcePathArray);
+						//Sys.println("zip source " + sourceZipUrl + " " + sourcePathArray);
 						dependencies.push(new ZipSourceDependency(sourceZipUrl, sourcePathArray));
 				}
 			}

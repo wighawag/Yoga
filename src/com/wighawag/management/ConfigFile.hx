@@ -1,6 +1,7 @@
 package com.wighawag.management;
 import haxe.Template;
 import massive.neko.io.File;
+import com.wighawag.util.Show;
 
 class ConfigFile 
 {
@@ -16,12 +17,11 @@ class ConfigFile
 	public function generate(directory : File, currentProject : YogaProject, dependencySet : DependencySet, yogaSettings : YogaSettings) : Void
 	{
 		
-		Sys.println("config gile : (" + templateFileName + " -> " + outputFileName + ")");
+		Show.message("     config file : (" + templateFileName + " -> " + outputFileName + ")");
 		var templateFile = directory.resolveFile(templateFileName);
 		if (!templateFile.exists)
 		{
-			Sys.println("template file " + templateFile.nativePath +" does not exists");
-			Sys.exit(1);
+			Show.criticalError("template file " + templateFile.nativePath +" does not exists");
 		}
 		
 		var template : Template = new Template(templateFile.readString());

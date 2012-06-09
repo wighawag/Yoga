@@ -1,4 +1,5 @@
 package com.wighawag.management;
+import com.wighawag.util.Show;
 
 class HaxelibDependency implements Dependency
 {
@@ -37,8 +38,7 @@ class HaxelibDependency implements Dependency
 		var returnCode = Haxelib.install(name, version);
 		if (returnCode > 1)
 		{
-			Sys.println("error in installing haxelib " + name + " version " + version );
-			Sys.exit(1);
+			Show.criticalError("failed installing haxelib " + name + " version " + version );
 		}
 		dependencySet.add(this);
 	}

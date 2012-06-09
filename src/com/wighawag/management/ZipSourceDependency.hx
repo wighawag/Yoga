@@ -5,7 +5,7 @@ import com.wighawag.management.YogaSettings;
 import com.wighawag.system.SystemUtil;
 import massive.neko.io.File;
 import sys.FileSystem;
-
+import com.wighawag.util.Show;
 
 class ZipSourceDependency implements Dependency 
 {
@@ -49,14 +49,13 @@ class ZipSourceDependency implements Dependency
 			var got : Bool = ZipExtractor.getZip(tmpZipFile.nativePath , url);
 			if (!got)
 			{
-				Sys.println("cannot download " + url);
-				Sys.exit(1);
+				Show.criticalError("cannot download " + url);
 			}
 				
-			Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
+			//Sys.println("zip downloaded :  " + tmpZipFile.nativePath);
 			
 			//then unzip 
-			Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory.nativePath);
+			//Sys.println("unzipping " + tmpZipFile.nativePath + " to " + localRepoProjectDirectory.nativePath);
 			
 			ZipExtractor.extract(tmpZipFile.nativePath, localRepoProjectDirectory.nativePath);
 		}
@@ -69,7 +68,7 @@ class ZipSourceDependency implements Dependency
 			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
 			for (file in files)
 			{
-				Sys.println(file.nativePath);
+				//Sys.println(file.nativePath);
 				if (file.isDirectory)
 				{
 					srcDirectory = file;
@@ -84,8 +83,7 @@ class ZipSourceDependency implements Dependency
 			
 			if (!srcDirectory.exists)
 			{
-				Sys.println("the srcPath '" + srcDirectory.nativePath + "' does not exist");
-				Sys.exit(1);
+				Show.criticalError("the srcPath '" + srcDirectory.nativePath + "' does not exist");
 			}
 			
 			var sourceDependency : SourceDependency = new SourceDependency(srcDirectory.nativePath, getUniqueId() + srcDirectory.nativePath);

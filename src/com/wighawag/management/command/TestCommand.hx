@@ -10,7 +10,7 @@ import com.wighawag.management.YogaSettings;
 import haxe.Template;
 import massive.neko.io.File;
 import sys.io.Process;
-
+import com.wighawag.util.Show;
 
 class TestCommand extends DependencyYogaCommand
 {
@@ -31,7 +31,7 @@ class TestCommand extends DependencyYogaCommand
 		
 		if (currentProject.testDirectory == null)
 		{
-			Sys.println("no test specified");
+			Show.message("no test specified");
 			return;
 		}
 		
@@ -138,7 +138,7 @@ class MunitConfig
 		{
 			if (target.name == "cpp")
 			{
-				Sys.println("munit does not support cpp yet, this will be ignored by munit test runner");
+				Show.message("munit does not support cpp yet, this will be ignored by munit test runner");
 			}
 			targets.push(target);
 		}

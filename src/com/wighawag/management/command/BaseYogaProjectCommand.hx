@@ -1,5 +1,6 @@
 package com.wighawag.management.command;
 import com.wighawag.management.YogaProject;
+import com.wighawag.util.Show;
 
 class BaseYogaProjectCommand extends BaseYogaSettingsCommand
 {
@@ -18,18 +19,14 @@ class BaseYogaProjectCommand extends BaseYogaSettingsCommand
 		
         // get access to the project xml
         if (!currentProjectFile.exists){
-            Sys.println("no "+ yogaSettings.yogaFileName + " found");
-            Sys.exit(1);
+            Show.criticalError("no "+ yogaSettings.yogaFileName + " found");
         }
 		
 		var content = currentProjectFile.readString();
 		
 		currentProject = new YogaProject(content);
 		
-		
-		Sys.println("******* This project use yoga version " + currentProject.yogaVersion + " *********");
-		
-		
+		Show.message("******* This project use yoga version " + currentProject.yogaVersion + " *********");
 	}
 	
 }

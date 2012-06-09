@@ -1,6 +1,6 @@
 package com.wighawag.management;
 import massive.neko.io.File;
-
+import com.wighawag.util.Show;
 
 class YogaSettings 
 {
@@ -31,15 +31,13 @@ class YogaSettings
 			var settingsTag : Xml = settingsXml.elementsNamed("settings").next();
 			if (settingsTag == null)
 			{
-				Sys.println("no valid settings");
-				Sys.exit(1);
+				Show.criticalError("no valid settings");
 			}
 			var repositoriesTag : Xml = settingsTag.elementsNamed("repositories").next();
 			if (repositoriesTag != null)
 			{
 				for (repository in repositoriesTag.elementsNamed("repository"))
 				{
-					Sys.println("add repo " + repository.get("url"));
 					repoList.push(repository.get("url"));
 				}
 			}
@@ -47,7 +45,7 @@ class YogaSettings
 			var deployTag : Xml = settingsTag.elementsNamed("deploy-server").next();
 			if (deployTag != null)
 			{
-				Sys.println("deploy address : " + deployTag.get("url"));
+				//Sys.println("deploy address : " + deployTag.get("url"));
 				deployServer = deployTag.get("url");
 			}
 			else
@@ -57,7 +55,7 @@ class YogaSettings
 		}
 		else
 		{
-			Sys.println("no config provided");
+			Show.message("no config provided");
 		}
 		
 		

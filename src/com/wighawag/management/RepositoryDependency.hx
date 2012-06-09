@@ -3,7 +3,7 @@ import com.wighawag.format.zip.ZipExtractor;
 import com.wighawag.system.SystemUtil;
 import sys.FileSystem;
 import sys.io.File;
-
+import com.wighawag.util.Show;
 
 class RepositoryDependency implements Dependency
 {
@@ -41,14 +41,13 @@ class RepositoryDependency implements Dependency
 			var tmpZipPath = ZipExtractor.getZipFromAnyRepositories(settings.localTmp.nativePath, settings.repoList, id, version);
 			if (tmpZipPath == null)
 			{
-				Sys.println("cannot find " + id + ":" + version);
-				Sys.exit(1);
+				Show.criticalError("cannot find " + id + ":" + version);
 			}
 				
-			Sys.println("zip downloaded :  " + tmpZipPath);
+			//Sys.println("zip downloaded :  " + tmpZipPath);
 			
 			//then unzip 
-			Sys.println("unzipping " + tmpZipPath + " to " + localRepoProjectDirectory.nativePath);
+			//Sys.println("unzipping " + tmpZipPath + " to " + localRepoProjectDirectory.nativePath);
 			ZipExtractor.extract(tmpZipPath, localRepoProjectDirectory.nativePath);
 		}
 		
@@ -56,16 +55,14 @@ class RepositoryDependency implements Dependency
 		var projectFile = localRepoProjectDirectory.resolveFile(settings.yogaFileName);
 		if (!projectFile.exists)
 		{
-			Sys.println("this dependency does not have any project file, it has been wrongly installed");
-			Sys.exit(1);
+			Show.criticalError("this dependency (" + id + "_" + version + ") does not have any project file, it has been wrongly installed");
 		}
 		
 		var dependencyProject : YogaProject = new YogaProject(projectFile.readString());
 		
 		if (id != dependencyProject.id)
 		{
-			Sys.println("id do not match between the declared dependency and the actual dependency project! " + "( id :" + id + ", dependencyId : " + dependencyProject.id + ")" );
-			Sys.exit(1);
+			Show.criticalError("id do not match between the declared dependency and the actual dependency project! " + "( id :" + id + ", dependencyId : " + dependencyProject.id + ")" );
 		}
 		
 			

@@ -1,5 +1,5 @@
 package com.wighawag.management;
-
+import com.wighawag.util.Show;
 
 class DependencySet 
 {
@@ -23,7 +23,7 @@ class DependencySet
 		if (dictionary.exists(dependency.getUniqueId()))
 		{
 			var registeredDependency : Dependency = dictionary.get(dependency.getUniqueId());
-			Sys.println("dependency already grabbed");
+			//Sys.println("dependency already grabbed");
 			
 			var type = Type.getClass(dependency);
 			if (type == HaxelibDependency)
@@ -32,8 +32,7 @@ class DependencySet
 				// TODO : deal with version comp:
 				if (registeredHaxelibDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					Sys.println("dependencies on different version ");
-					Sys.exit(1);
+					Show.criticalError("dependencies on different version ");
 				}
 				
 			}
@@ -43,8 +42,7 @@ class DependencySet
 				// TODO : deal with version comp:
 				if (registeredRepoDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					Sys.println("dependencies on different version ");
-					Sys.exit(1);
+					Show.criticalError("dependencies on different version ");
 				}
 			}
 			
