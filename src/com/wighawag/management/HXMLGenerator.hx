@@ -4,7 +4,7 @@ import massive.neko.io.File;
 class HXMLGenerator 
 {
 
-	static public function generate(targetDirectory : File, outputs : Array<Output>, dependencySet : DependencySet, extraParameters : Array<String>, ?mainClass : String ) : String 
+	static public function generate(currentDirectory : File, targetDirectory : File, outputs : Array<Output>, dependencySet : DependencySet, extraParameters : Array<String>, ?mainClass : String ) : String 
 	{
 		var hxmlString = "";
 		var counter = 0;
@@ -15,7 +15,7 @@ class HXMLGenerator
 				hxmlString += "--next\n";
 			}
 			
-			hxmlString += output.generateHxml(targetDirectory, dependencySet, extraParameters, mainClass);
+			hxmlString += output.generateHxml(currentDirectory, targetDirectory, dependencySet, extraParameters, mainClass);
 			
 			counter ++;
 		}

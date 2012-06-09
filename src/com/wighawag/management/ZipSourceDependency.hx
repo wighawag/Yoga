@@ -36,7 +36,7 @@ class ZipSourceDependency implements Dependency
 		// TODO extract from ZipProjectDependency and RepositoryDependency and use it here as well
 		
 		
-		var localRepoProjectDirectory  = settings.localZipProjectRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
+		var localRepoProjectDirectory  = settings.localZipSourceRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
 		
 		// check if exist locally
 		if (!localRepoProjectDirectory.exists)

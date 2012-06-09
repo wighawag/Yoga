@@ -2,7 +2,7 @@ package com.wighawag.management.command;
 import massive.neko.io.File;
 
 
-class InstallCommand extends DependencyYogaCommand
+class InstallCommand extends TestCommand
 {
 
 	private var projectFiles : Hash<Bool>;

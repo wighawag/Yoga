@@ -26,7 +26,7 @@ class ConfigCommand extends DependencyYogaCommand
 			var outputs : Array<Output> = new Array<Output>();
 			outputs.push(new Output(currentProject.shortName + "_" + currentProject.version + target.getExtension(), target));
 			
-			var hxml = HXMLGenerator.generate(targetDirectory, outputs, dependencySet, currentProject.compilerParameters, currentProject.mainClass);
+			var hxml = HXMLGenerator.generate(console.dir, targetDirectory, outputs, dependencySet, currentProject.compilerParameters, currentProject.mainClass);
 			var hxmlFile = console.dir.resolveFile(currentProject.outputPrefix + "_" + target.name + ".hxml", true);
 			hxmlFile.writeString(hxml);
 		}

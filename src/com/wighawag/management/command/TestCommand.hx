@@ -37,7 +37,8 @@ class TestCommand extends DependencyYogaCommand
 		
 		var munitConfig : MunitConfig = new MunitConfig(currentProject, dependencySet, yogaSettings);
 		
-		//TODO delete .munit file
+		var munitFile : File = console.dir.resolveFile(".munit");
+		munitFile.deleteFile();
 		
 		var testHxmlFile : File = console.dir.resolveFile(munitConfig.testHxmlFile);
 		testHxmlFile.deleteFile();
@@ -77,13 +78,15 @@ class TestCommand extends DependencyYogaCommand
 		testDependencySet.add(new HaxelibDependency("munit"));
 		//var testPath = console.dir.resolveDirectory(currentProject.testDirectory).nativePath;
 		testDependencySet.add(new SourceDependency(currentProject.testDirectory, currentProject.testDirectory));
-		var hxml = HXMLGenerator.generate(testOutputDirectory, outputs, testDependencySet, currentProject.compilerParameters, "TestMain");
+		var hxml = HXMLGenerator.generate(console.dir, testOutputDirectory, outputs, testDependencySet, currentProject.compilerParameters, "TestMain");
 		
 		
 		testHxmlFile.writeString(hxml);
 		
 		
-		// TODO : patch or rewrite the TestMain.hx so that it use an TextOutput
+		var testMainFile : File = console.originalDir.resolveFile("TestMain.hx");
+		var destTestMainFile : File = console.dir.resolveFile(currentProject.testDirectory + "/TestMain.hx");
+		testMainFile.copyTo(destTestMainFile, true);
 		
 		var munitRunProcess = new Process("haxelib", ["run", "munit", "test"]);
 		var output = munitRunProcess.stdout.readAll().toString();
@@ -91,12 +94,27 @@ class TestCommand extends DependencyYogaCommand
 		
 		// TODO : if failure stop and 
 		
-		Sys.println(output);
-		//Sys.println("ERROR :" + errorOutput);
+		//Sys.println(output);
+
+		//PLATFORMS TESTED: 2, PASSED: 0, FAILED: 2, ERRORS: 0, TIME: 1.13492
+		var resultLine = output.substr(output.indexOf("PLATFORMS TESTED:"));
+		resultLine = resultLine.substr(0,resultLine.indexOf("\n"));
 		
-		//Sys.command("haxelib", ["run", "munit", "run"]);
-		
-		//Sys.command("haxelib", ["run", "munit", "test"]);
+		var failChunk = resultLine.substr(resultLine.indexOf("FAILED:")+8);
+		failChunk = failChunk.substr(0, failChunk.indexOf(","));
+		var platformFailures = Std.parseInt(failChunk);
+		if (platformFailures > 0)
+		{
+			Show.criticalError("Test Failures ");
+		}
+
+		var errorChunk = resultLine.substr(resultLine.indexOf("ERRORS:")+8);
+		errorChunk = errorChunk.substr(0, errorChunk.indexOf(","));
+		var platformErrors = Std.parseInt(errorChunk);
+		if (platformErrors > 0)
+		{
+			Show.criticalError("Test Errors ");
+		}
 	}
 	
 }
