@@ -1,0 +1,2 @@
+add hxssl as dependency to fix the missing dll
+but this also require hxssl to provide a 64bit version of tls

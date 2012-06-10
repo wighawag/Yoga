@@ -58,15 +58,21 @@ class ZipSourceDependency implements Dependency
 		{
 			var srcDirectory : File = null;
 			
-			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
-			for (file in files)
+			if(srcPath.charAt(0)== "\\" && srcPath.charAt(srcPath.length -1) == "\\")
 			{
-				if (file.isDirectory)
+				srcPath = srcPath.substr(1, srcPath.length - 2);
+				var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(srcPath, ""));
+				for (file in files)
 				{
-					srcDirectory = file;
-					break;
+					if (file.isDirectory)
+					{
+						srcDirectory = file;
+						break;
+					}
 				}
 			}
+			
+			
 		
 			if (srcDirectory == null)
 			{

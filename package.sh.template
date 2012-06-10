@@ -2,7 +2,7 @@
 rm package.zip
 mkdir package
 cp src/haxelib.xml package/haxelib.xml
-cp target/Yoga_1.n package/run.n
+cp target/::shortName::_::version::.n package/run.n
 cp src/yoga.sh package/yoga.sh
 cp src/yoga.bat package/yoga.bat
 cp src/TestMain.hx package/TestMain.hx

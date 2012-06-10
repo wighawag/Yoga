@@ -27,7 +27,7 @@ class ConfigFile
 		var template : Template = new Template(templateFile.readString());
 		
 		var outputFile = directory.resolveFile(outputFileName, true);
-		outputFile.writeString(template.execute(new YogaProjectForTemplate(currentProject, dependencySet, yogaSettings)));
+		outputFile.writeString(template.execute(new YogaProjectForTemplate(directory, currentProject, dependencySet, yogaSettings)));
 	}
 	
 }
@@ -43,11 +43,14 @@ class YogaProjectForTemplate
 	public var sourceDependencies : Array<SourceDependency>;
 	public var extraCompilerParameters : Array<String>;
 	public var targetDirectory : String;
+	public var projectSourceDirectories : Array<String>;
+	public var sourceFiles : Array<String>;
 	
 	
-	
-	public function new(yogaProject : YogaProject, dependencySet : DependencySet, yogaSettings : YogaSettings)
+	public function new(currentDir : File, yogaProject : YogaProject, dependencySet : DependencySet, yogaSettings : YogaSettings)
 	{
+		sourceFiles = new Array<String>();
+		projectSourceDirectories = new Array<String>();
 		targetDirectory = yogaSettings.targetDirectory;
 		shortName = yogaProject.shortName;
 		id = yogaProject.id;
@@ -72,7 +75,39 @@ class YogaProjectForTemplate
 			}
 			else if (Type.getClass(dependency) == SourceDependency)
 			{
-				sourceDependencies.push(cast(dependency, SourceDependency));
+				var sourceDependency = cast(dependency, SourceDependency);
+				
+				var isProjectSource : Bool = false;
+				for (sourcePath in yogaProject.sources)
+				{
+					if (sourceDependency.path == sourcePath)
+					{
+						isProjectSource = true;
+						break;
+					}
+				}
+				
+				if (isProjectSource)
+				{
+					projectSourceDirectories.push(sourceDependency.path);
+				}
+				else
+				{
+					sourceDependencies.push(sourceDependency);
+				}
+			}
+		}
+		
+		for (projectSourcePath in yogaProject.sources)
+		{
+			var sourceDir = currentDir.resolveDirectory(projectSourcePath);
+			var files = sourceDir.getRecursiveDirectoryListing(new EReg("(^|/)\\.(.*)", ""), true);
+			for (file in files)
+			{
+				if (!file.isDirectory)
+				{
+					sourceFiles.push(currentDir.getRelativePath(file));
+				}
 			}
 		}
 		

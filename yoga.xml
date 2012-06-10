@@ -2,17 +2,34 @@
 <project>
 	<yoga-version>1</yoga-version>
 	
-	<id>com.wighawag.management.ManagenmentTest</id>
-	<version>0.1</version>
+	<id>com.wighawag.management.Yoga</id>
+	<version>1</version>
+
+	<main>com.wighawag.management.Yoga</main>
 	
-	<defaultTarget>swf</defaultTarget>
 	
+	<sources>
+		<source path="src" />
+	</sources>
+
+	<targets hxml="compile">
+		<target name="neko" />
+	</targets>
+
+	<config-file template="hxproj.template" output="Yoga.hxproj" />
+	<config-file template="sln.template" output="Yoga.sln" />
+	<config-file template="package.sh.template" output="package.sh" />
+
 	<dependencies>
-		<haxelib name="hxJson2" version="1" />
-		<haxelib name="polygonal" version="1.20" />
-		<repository id="" version="" />
-		<zip url="" />
-		<git url="" tag="" />
-		<svn url="" tag="" />
+		<haxelib name="hxssl"  />
+		<haxelib name="munit"  />
+		
+		<sourcezip url="https://github.com/wighawag/MassiveLib/zipball/0.3.0.3-for-yoga" >
+			<sources>
+				<source path="wighawag-MassiveLib-3c32f9d/neko/src"/>
+				<source path="wighawag-MassiveLib-3c32f9d/haxe/src"/>
+			</sources>
+		</sourcezip>
+
 	</dependencies>
 </project>
