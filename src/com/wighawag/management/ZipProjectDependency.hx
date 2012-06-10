@@ -66,16 +66,20 @@ class ZipProjectDependency implements Dependency
 		}
 		else
 		{
-			var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(path, ""));
-			for (file in files)
+			if(path.charAt(0)== "\\" && path.charAt(path.length -1) == "\\")
 			{
-				if (!file.isDirectory)
+				path = path.substr(1, path.length - 2);
+				var files : Array<File> = localRepoProjectDirectory.getRecursiveDirectoryListing(new EReg(path, ""));
+				for (file in files)
 				{
-					projectFile = file;
-					break;
+					if (!file.isDirectory)
+					{
+						projectFile = file;
+						break;
+					}
 				}
 			}
-		
+			
 			if (projectFile == null)
 			{
 				projectFile = localRepoProjectDirectory.resolveDirectory(path);
