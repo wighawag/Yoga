@@ -18,17 +18,38 @@ class ConfigFile
 	{
 		
 		Show.message("     config file : (" + templateFileName + " -> " + outputFileName + ")");
-		var templateFile = directory.resolveFile(templateFileName);
+		var templateFile = directory.resolvePath(templateFileName);
 		if (!templateFile.exists)
 		{
 			Show.criticalError("template file " + templateFile.nativePath +" does not exists");
 		}
-		
-		var template : Template = new Template(templateFile.readString());
-		
-		var outputFile = directory.resolveFile(outputFileName, true);
-		outputFile.writeString(template.execute(new YogaProjectForTemplate(directory, currentProject, dependencySet, yogaSettings)));
+
+        if (templateFile.isDirectory){
+        	var outputDirectory = directory.resolveDirectory(outputFileName);
+            //Show.message("Directory template not supported yet");
+            var files = templateFile.getRecursiveDirectoryListing();
+            for (file in files)
+            {
+            	var relativePath = templateFile.getRelativePath(file);
+            	if (file.isFile)
+            	{	
+            		var outputFile = outputDirectory.resolveFile(relativePath,true);
+            		var template : Template = new Template(file.readString());
+	    			outputFile.writeString(template.execute(new YogaProjectForTemplate(directory, currentProject, dependencySet, yogaSettings)));
+            	}
+            	else
+            	{
+            		var outputSubDirectory = outputDirectory.resolveDirectory(relativePath,true);
+            	}
+            }
+
+        }else{
+		    var outputFile = directory.resolveFile(outputFileName, true);
+		    var template : Template = new Template(templateFile.readString());
+	    	outputFile.writeString(template.execute(new YogaProjectForTemplate(directory, currentProject, dependencySet, yogaSettings)));
+        }
 	}
+	
 	
 }
 
@@ -45,6 +66,7 @@ class YogaProjectForTemplate
 	public var targetDirectory : String;
 	public var projectSourceDirectories : Array<String>;
 	public var sourceFiles : Array<String>;
+	public var hxmlPrefix : String;
 	
 	
 	public function new(currentDir : File, yogaProject : YogaProject, dependencySet : DependencySet, yogaSettings : YogaSettings)
@@ -111,5 +133,6 @@ class YogaProjectForTemplate
 			}
 		}
 		
+		hxmlPrefix = yogaProject.outputPrefix;
 	}
 }
