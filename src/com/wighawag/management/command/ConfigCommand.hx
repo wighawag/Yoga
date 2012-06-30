@@ -2,6 +2,7 @@ package com.wighawag.management.command;
 import com.wighawag.management.HXMLGenerator;
 import com.wighawag.management.Output;
 import massive.neko.io.File;
+import com.wighawag.util.Show;
 
 class ConfigCommand extends DependencyYogaCommand
 {
@@ -20,7 +21,12 @@ class ConfigCommand extends DependencyYogaCommand
 		
 		targetDirectory = console.dir.resolveDirectory(yogaSettings.targetDirectory, true);
 		
-		
+		if (currentProject.mainClass == null)
+        {
+            Show.message("target currently do not support project without main class");
+            return;
+        }
+
 		for (target in currentProject.targets)
 		{
 			var outputs : Array<Output> = new Array<Output>();

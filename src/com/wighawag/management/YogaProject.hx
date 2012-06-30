@@ -92,14 +92,11 @@ class YogaProject
 		
 		
 		var mainTag : Xml = projectTag.elementsNamed("main").next();
-		if (mainTag == null)
+		if (mainTag != null)
 		{
-			// TODO this should be optional
-			Show.criticalError("main class not specified (currenlty does not support project without main class)");
+            mainClass = mainTag.firstChild().toString();
 		}
-		mainClass = mainTag.firstChild().toString();
-		
-		
+
 		
 		var munitTestTag : Xml = projectTag.elementsNamed("munit-tests").next();
 		if (munitTestTag == null)

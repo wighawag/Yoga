@@ -78,6 +78,10 @@ class YogaProjectForTemplate
 		id = yogaProject.id;
 		version = yogaProject.version;
 		mainClass = yogaProject.mainClass;
+        if (mainClass == null)
+        {
+            mainClass = ""; // TODO check whether template if statement support null. if that is the case better use null
+        }
 		var dotIndex = mainClass.lastIndexOf('.');
 		if (dotIndex > -1)
 		{
