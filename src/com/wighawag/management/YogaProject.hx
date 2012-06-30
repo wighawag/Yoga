@@ -170,7 +170,7 @@ class YogaProject
 		var targetsTag : Xml = projectTag.elementsNamed("targets").next();
 		if (targetsTag == null)
 		{
-			Show.criticalError("There is no targets");
+			Show.message("There is no targets");
 		}
 		else
 		{
@@ -196,9 +196,10 @@ class YogaProject
 				
 				counter ++;
 			}
+
 			if (counter == 0)
 			{
-				Show.criticalError("There is no targets specified");
+				Show.message("There is no targets specified");
 			}
 		}
 		

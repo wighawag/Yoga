@@ -34,7 +34,12 @@ class TestCommand extends DependencyYogaCommand
 			Show.message("no test specified");
 			return;
 		}
-		
+
+        if (currentProject.targets.length == 0)
+        {
+            Show.criticalError("There are no targets specified, Tests cannot be run");
+        }
+
 		var munitConfig : MunitConfig = new MunitConfig(currentProject, dependencySet, yogaSettings);
 		
 		var munitFile : File = console.dir.resolveFile(".munit");
