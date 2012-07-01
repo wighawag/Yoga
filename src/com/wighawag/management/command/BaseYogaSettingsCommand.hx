@@ -15,7 +15,7 @@ class BaseYogaSettingsCommand extends Command
 		super();
 	}
 	
-	override function execute() : Void
+	override public function execute() : Void
 	{
 		super.execute();
 		

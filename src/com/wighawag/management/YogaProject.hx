@@ -1,4 +1,7 @@
 package com.wighawag.management;
+import com.wighawag.management.test.HaxeTests;
+import com.wighawag.management.test.MunitTests;
+import com.wighawag.management.test.TestFramework;
 import com.wighawag.util.Show;
 
 
@@ -17,9 +20,7 @@ class YogaProject
 	public var id : String;
 	public var version : String;
 	
-	public var munitVersion : String;
-	public var testDirectory : String;
-	public var testHxmlFile : String;
+	public var testFramework : TestFramework;
 	public var outputPrefix:String;
 	
 	public var shortName(getShortName, null) : String;
@@ -98,35 +99,47 @@ class YogaProject
 		}
 
 		
-		var munitTestTag : Xml = projectTag.elementsNamed("munit-tests").next();
-		if (munitTestTag == null)
+		var testsTag : Xml = projectTag.elementsNamed("tests").next();
+		if (testsTag == null)
 		{
 			Show.message("test not specified for" + id + '_' + version);
 		}
 		else
 		{
-			// TODO make version useful , for now it does not have any effect
-			munitVersion = munitTestTag.get('version');
-			if (munitVersion == "")
-			{
-				Show.criticalError("munit version not specified");
-			}
-			
-			testDirectory = munitTestTag.get('path');
-			if (testDirectory == null || testDirectory == "")
-			{
-				Show.criticalError("test path not specified for " + id + '_' + version);
-			}
-			
-			testHxmlFile = munitTestTag.get('hxml');
-			if (testHxmlFile == null || testHxmlFile == "")
-			{
-				testHxmlFile = "test.hxml";
-			}
+            var framework = testsTag.get("framework");
+
+            var testDirectory = testsTag.get('path');
+            if (testDirectory == null || testDirectory == "")
+            {
+                Show.criticalError("test path not specified for " + id + '_' + version);
+            }
+
+            var testHxmlFile = testsTag.get('hxml');
+            if (testHxmlFile == null || testHxmlFile == "")
+            {
+                testHxmlFile = "test.hxml";
+            }
+
+            if (framework == "munit")
+            {
+                testFramework = new MunitTests(testDirectory, testHxmlFile);
+            }
+            else if(framework == "default")
+            {
+                var testMainClass = testsTag.get('mainClass');
+                if (testMainClass == null || testMainClass == "")
+                {
+                    Show.criticalError("default test framework require a main test Class");
+                }
+
+                testFramework = new HaxeTests(testDirectory, testHxmlFile, testMainClass);
+            }
+            else
+            {
+                Show.message("test framework " + framework + " not supported");
+            }
 		}
-		
-		
-		
+
 		runtimeResources = new Array<String>();
 		var runtimeResourcesTag : Xml = projectTag.elementsNamed("runtime-resources").next();
 		if (runtimeResourcesTag == null)

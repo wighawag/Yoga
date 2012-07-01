@@ -11,7 +11,7 @@ class DependencyYogaCommand extends BaseYogaProjectCommand
 		super();
 	}
 	
-	override function execute():Void 
+	override public function execute():Void
 	{
 		super.execute();
 		
