@@ -18,6 +18,8 @@ class BaseYogaSettingsCommand extends Command
 	override public function execute() : Void
 	{
 		super.execute();
+
+        Show.message("version 1");
 		
 		var settingsFolderPath : String = "";
 		if (Sys.environment().exists("HOME")) {

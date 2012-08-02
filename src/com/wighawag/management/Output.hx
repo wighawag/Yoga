@@ -15,8 +15,15 @@ class Output
 	public function generateHxml(currentDirectory : File, targetDirectory : File, dependencySet : DependencySet, extraParameters : Array<String>, mainClass : String) : String
 	{		
 		var result : String = "";
-		
-		var outputFile : File = targetDirectory.resolveFile(outputFileName, true);
+
+        var outputFile : File;
+        if (target.name == "cpp"){
+            outputFile = targetDirectory.resolveDirectory(outputFileName, true);
+            trace("create directory " + outputFileName);
+        }
+        else{
+            outputFile = targetDirectory.resolveFile(outputFileName, true);
+        }
 
 		result += target.getHxmlLines(currentDirectory.getRelativePath(outputFile));
 
