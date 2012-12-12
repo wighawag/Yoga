@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <project name="yoga" url="https://github.com/wighawag/Yoga" license="GPL">
 	<description>Yoga aims to be a tool like maven with at first the functionality of dependency management and project setup.</description>
     <version name="0.0.1">Initial release, grab required haxelib dependencies</version>
