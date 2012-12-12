@@ -8,4 +8,5 @@
 	<tag v="haxelib"/>
 	<tag v="dependency"/>
 	<depends name="haxelib-runner"/> <!-- last version so that if haxelib change the haxelib runner can handle the changes --> 
+	<depends name="hxssl"/>
 </project>
