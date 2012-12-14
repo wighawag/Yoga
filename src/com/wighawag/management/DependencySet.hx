@@ -32,7 +32,7 @@ class DependencySet
 				// TODO : deal with version comp:
 				if (registeredHaxelibDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					Show.criticalError("dependencies on different version ");
+					Show.criticalError("dependencies on different versions (" + registeredHaxelibDependency.version + " vs " + cast(dependency, HaxelibDependency).version + ")");
 				}
 				
 			}
@@ -42,7 +42,7 @@ class DependencySet
 				// TODO : deal with version comp:
 				if (registeredRepoDependency.version != cast(dependency, HaxelibDependency).version)
 				{
-					Show.criticalError("dependencies on different version ");
+                    Show.criticalError("dependencies on different versions (" + registeredRepoDependency.version + " vs " + cast(dependency, HaxelibDependency).version + ")");
 				}
 			}
 			

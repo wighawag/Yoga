@@ -19,7 +19,7 @@ class Output
         var outputFile : File;
         if (target.name == "cpp"){
             outputFile = targetDirectory.resolveDirectory(outputFileName, true);
-            trace("create directory " + outputFileName);
+            //trace("create directory " + outputFileName);
         }
         else{
             outputFile = targetDirectory.resolveFile(outputFileName, true);

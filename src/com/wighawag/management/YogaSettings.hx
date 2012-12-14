@@ -55,7 +55,7 @@ class YogaSettings
 		}
 		else
 		{
-			Show.message("no config provided");
+			Show.message("no settings.xml found");
 		}
 		
 		

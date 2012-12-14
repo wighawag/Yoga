@@ -19,8 +19,6 @@ class BaseYogaSettingsCommand extends Command
 	{
 		super.execute();
 
-        Show.message("version 1");
-		
 		var settingsFolderPath : String = "";
 		if (Sys.environment().exists("HOME")) {
 			settingsFolderPath = new Path(Sys.getEnv("HOME") + '/.yoga').toString();
@@ -35,7 +33,7 @@ class BaseYogaSettingsCommand extends Command
 		{
 			Show.criticalError("no Environment variable defined for finding the yoga folder." +
 			"\nPlease set YOGA_FOLDER to the path you want yoga to store its local repo and settings" +
-			"\nor set HOME or USERPROFILE environement variable to your home folder where yoga will create a directory");
+			"\nor set HOME or USERPROFILE environement variable to your home folder where yoga will create a .yoga directory");
 		}
 		
 		var settingsDirectory : File = null;
@@ -56,11 +54,11 @@ class BaseYogaSettingsCommand extends Command
 				settingsDirectory.createDirectory();
 			} catch (e : Dynamic)
 			{
-				Show.criticalError("creating the directory " + e + " , you might need to create manually at " + settingsFolderPath);
+				Show.criticalError("creating the directory :\n" + e + "\n, you might need to create it manually at " + settingsFolderPath);
 			}
 		}
 		
-		Show.message("yoga folder : " + settingsDirectory.nativePath);
+		Show.message("Yoga folder : " + settingsDirectory.nativePath);
 		
 		yogaSettings = new YogaSettings(settingsDirectory);
 	}

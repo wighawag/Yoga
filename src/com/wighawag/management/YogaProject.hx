@@ -144,7 +144,7 @@ class YogaProject
 		var runtimeResourcesTag : Xml = projectTag.elementsNamed("runtime-resources").next();
 		if (runtimeResourcesTag == null)
 		{
-			Show.message("no runtime resources sspecified for" + id + '_' + version);
+			//Show.message("no runtime resources specified for" + id + '_' + version);
 		}
 		else
 		{
@@ -163,7 +163,7 @@ class YogaProject
 		var compiletimeResourcesTag : Xml = projectTag.elementsNamed("compiletime-resources").next();
 		if (compiletimeResourcesTag == null)
 		{
-			Show.message("no compile time resources specified for" + id + '_' + version);
+			//Show.message("no compile time resources specified for" + id + '_' + version);
 		}
 		else
 		{

@@ -3,7 +3,7 @@
 	<yoga-version>1</yoga-version>
 	
 	<id>com.wighawag.management.Yoga</id>
-	<version>1</version>
+	<version>0.0.1</version>
 
 	<main>com.wighawag.management.Yoga</main>
 	
@@ -22,14 +22,9 @@
 
 	<dependencies>
 		<haxelib name="hxssl"  />
-		<haxelib name="munit"  />
-		
-		<sourcezip url="https://github.com/wighawag/MassiveLib/zipball/0.3.0.3-for-yoga" >
-			<sources>
-				<source path="wighawag-MassiveLib-3c32f9d/neko/src"/>
-				<source path="wighawag-MassiveLib-3c32f9d/haxe/src"/>
-			</sources>
-		</sourcezip>
-
+		<!--<haxelib name="munit"  /> -->
+		<haxelib name="haxelib-runner" />
+        <repository id="com.wighawag.appengine-login" version="0.0.1" />
+        <repository id="com.wighawag.wighawag-mlib" version="0.0.1" />
 	</dependencies>
 </project>

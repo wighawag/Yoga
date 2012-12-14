@@ -18,9 +18,9 @@ class Haxelib
 			Show.message("installing " + libraryName + ":" + version);
 			process = new Process("haxelib", ["run", "haxelib-runner", "install", libraryName, version ]);
 		}
-		
+		// TODO deal with Blocked answer from haxelib (when connection is too slow ?)
 		
 		return process.exitCode();
 	}
-	
+
 }
