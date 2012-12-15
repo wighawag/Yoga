@@ -3,8 +3,7 @@
 	<compiler-version>2.10</compiler-version>
 
 	<id>com.wighawag.management.Yoga</id>
-	<version>0.3.0</version>
-	<prepared>2012-12-15 18:06:07</prepared>
+	<version>0.3.1-SNAPSHOT</version>
 
 	<main>com.wighawag.management.Yoga</main>
 
