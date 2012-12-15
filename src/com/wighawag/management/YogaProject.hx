@@ -3,7 +3,7 @@ import com.wighawag.management.test.HaxeTests;
 import com.wighawag.management.test.MunitTests;
 import com.wighawag.management.test.TestFramework;
 import com.wighawag.util.Show;
-
+import semver.SemVer;
 
 class YogaProject 
 {
@@ -24,13 +24,15 @@ class YogaProject
 	public var outputPrefix:String;
 	
 	public var shortName(getShortName, null) : String;
+
+    private var prepared : String; // TODO : date
 	
 	function getShortName() : String
 	{
 		return id.substr(id.lastIndexOf(".") + 1);
 	}
 
-	public function new(content : String)
+	public function new(content : String, ?warn = true)
 	{
 		configFiles = new Array<ConfigFile>();
 		compilerParameters = new Array<String>();
@@ -61,17 +63,26 @@ class YogaProject
 			Show.criticalError("id not specified");
 		}
 		id = idTag.firstChild().toString();
-		
-		
+
 		var versionTag : Xml = projectTag.elementsNamed("version").next();
 		if (versionTag == null)
 		{
 			Show.criticalError("project version not specified");
 		}
 		version = versionTag.firstChild().toString();
-		
-		
-		
+
+        if(!SemVer.valid(version)){
+            Show.criticalError("The Version String is not valid");
+        }
+
+        var preparedTag : Xml = projectTag.elementsNamed("prepared").next();
+        if (preparedTag == null)
+        {
+            prepared = null;
+        }else{
+            prepared = preparedTag.firstChild().toString();
+        }
+
 		var sourcesTag : Xml = projectTag.elementsNamed("sources").next();
 		if (sourcesTag == null)
 		{
@@ -102,7 +113,7 @@ class YogaProject
 		var testsTag : Xml = projectTag.elementsNamed("tests").next();
 		if (testsTag == null)
 		{
-			Show.message("test not specified for" + id + '_' + version);
+			//if(warn)Show.message("test not specified for " + id + '_' + version);
 		}
 		else
 		{
@@ -136,7 +147,7 @@ class YogaProject
             }
             else
             {
-                Show.message("test framework " + framework + " not supported");
+                if(warn)Show.message("test framework " + framework + " not supported");
             }
 		}
 
@@ -163,7 +174,7 @@ class YogaProject
 		var compiletimeResourcesTag : Xml = projectTag.elementsNamed("compiletime-resources").next();
 		if (compiletimeResourcesTag == null)
 		{
-			//Show.message("no compile time resources specified for" + id + '_' + version);
+			//if(warn)Show.message("no compile time resources specified for" + id + '_' + version);
 		}
 		else
 		{
@@ -183,7 +194,7 @@ class YogaProject
 		var targetsTag : Xml = projectTag.elementsNamed("targets").next();
 		if (targetsTag == null)
 		{
-			Show.message("There is no targets");
+            if(warn)Show.message("There is no targets");
 		}
 		else
 		{
@@ -212,7 +223,7 @@ class YogaProject
 
 			if (counter == 0)
 			{
-				Show.message("There is no targets specified");
+                if(warn)Show.message("There is no targets specified");
 			}
 		}
 		
@@ -302,12 +313,23 @@ class YogaProject
 			}
 		}
 	}
+
+    public function isSnapshot() : Bool{
+        trace(id + "_" + version);
+        return version.indexOf("-SNAPSHOT") == (version.length - 9);
+    }
+
+    public function isPrepared() : Bool{
+        return prepared != null;
+    }
 	
 	public function join(yogaSettings : YogaSettings, dependencySet : DependencySet) : Void
 	{
 		for (dependency in dependencies)
 		{
-			dependency.grab(yogaSettings, dependencySet);
+            if (!dependencySet.contains(dependency)){
+                dependency.grab(yogaSettings, dependencySet);
+            }
 		}
 	}
 }

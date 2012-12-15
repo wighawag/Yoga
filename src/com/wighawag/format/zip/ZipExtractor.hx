@@ -55,19 +55,21 @@ class ZipExtractor
 		{
 			slash = "\\";
 		}
-		
+
+        var zipInput = File.read(zipPath, true);
+        var zipData = Reader.readZip(zipInput);
+        zipInput.close();
+
 		if (!FileSystem.exists(outputFolder))
 		{
 			FileSystem.createDirectory(outputFolder);
 		}
-		var zipInput = File.read(zipPath, true);
-		var zipData = Reader.readZip(zipInput);
-		zipInput.close();
+
 		for (oneData in zipData)
 		{
 			var content = (oneData.compressed) ? Reader.unzip(oneData) : oneData.data;
 			//Sys.println(" " + oneData.fileName + ": ");// + content);
-			var filePath : String = outputFolder + slash + oneData.fileName;
+			var filePath : String = outputFolder  + oneData.fileName;
 			if (filePath.charAt(filePath.length - 1) == "/")
 			{
 				if (!FileSystem.exists(filePath))
@@ -85,11 +87,11 @@ class ZipExtractor
 				}
 				if ( !FileSystem.exists( dirPath ) ) {
 					try{
-					FileSystem.createDirectory(dirPath);
+                        massive.neko.io.File.createDirectoryPath(dirPath);
 					}
 					catch (e: Dynamic)
 					{
-						Show.criticalError('failed creating ' + dirPath + '  ' + filePath);
+						Show.criticalError('failed creating ' + dirPath + ' (' + e + ')');
 					}
 				}
 

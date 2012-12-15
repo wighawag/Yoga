@@ -57,8 +57,9 @@ class RepositoryDependency implements Dependency
 		{
 			Show.criticalError("this dependency (" + id + "_" + version + ") does not have any project file, it has been wrongly installed");
 		}
-		
-		var dependencyProject : YogaProject = new YogaProject(projectFile.readString());
+
+        Show.message("grabing " + id + "_" + version);
+		var dependencyProject : YogaProject = new YogaProject(projectFile.readString(), false);
 		
 		if (id != dependencyProject.id)
 		{
@@ -84,5 +85,9 @@ class RepositoryDependency implements Dependency
 	{
 		return "RepositoryDependency_" + id;
 	}
+
+    public function isSnapshot() : Bool{
+        return version.indexOf("-SNAPSHOT") == (version.length - 9);
+    }
 	
 }

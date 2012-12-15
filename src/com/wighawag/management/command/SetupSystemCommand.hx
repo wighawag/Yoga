@@ -3,7 +3,7 @@ import massive.neko.cmd.Command;
 import massive.neko.io.FileSys;
 import sys.io.File;
 import com.wighawag.util.Show;
-class SetupCommand extends Command{
+class SetupSystemCommand extends Command{
 	
 	public function new () {
 		super();		

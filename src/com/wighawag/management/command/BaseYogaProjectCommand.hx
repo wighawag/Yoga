@@ -27,6 +27,7 @@ class BaseYogaProjectCommand extends BaseYogaSettingsCommand
 		currentProject = new YogaProject(content);
 		
 		Show.message("YOGA version : " + currentProject.yogaVersion);
+        Show.message("Project : " + currentProject.id + "_" + currentProject.version);
 	}
 	
 }
