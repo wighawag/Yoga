@@ -76,6 +76,8 @@ class DeployPrepareCommand extends TestCommand
         + content.substr(versionEnd + 10);
 
         currentProjectFile.writeString(newContent,false);
+
+        Show.done("You can now commit and tag  before deploying to the repo (deploy:perform)");
 	}
 	
 }

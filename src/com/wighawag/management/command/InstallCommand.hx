@@ -27,8 +27,10 @@ class InstallCommand extends TestCommand
         YogaFolders.cleanCopy(yogaSettings, currentProject, console.dir, tmpDir);
 
 		var installDir : File = yogaSettings.localRepoProjectRepo.resolveDirectory(currentProject.id + "_" + currentProject.version, true);
+        installDir.deleteDirectory(true);
 		tmpDir.moveTo(installDir, true);
-		
+
+        Show.success();
 	}
 
 

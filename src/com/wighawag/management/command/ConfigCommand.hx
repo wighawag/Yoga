@@ -43,7 +43,8 @@ class ConfigCommand extends DependencyYogaCommand
 		{
 			configFile.generate(console.dir, currentProject, dependencySet, yogaSettings);
 		}
-		
+
+        Show.done();
 	}
 	
 }

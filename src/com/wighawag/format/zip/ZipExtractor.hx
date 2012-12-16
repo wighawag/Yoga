@@ -120,7 +120,10 @@ class ZipExtractor
 				got = getZip(tmpZip, repoUrl + "/" + zipFileName);
 			}
 		}while (repoQueue.length > 0 &&  !got);
-		
+
+        if(!got){
+            return null;
+        }
 		return tmpZip;
 	}
 	

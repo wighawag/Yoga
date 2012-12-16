@@ -80,16 +80,22 @@ class MunitTests implements TestFramework{
         var munitRunProcess = new Process("haxelib", ["run", "munit", "test"]);
         var output = munitRunProcess.stdout.readAll().toString();
 
-        //PLATFORMS TESTED: 2, PASSED: 0, FAILED: 2, ERRORS: 0, TIME: 1.13492
+        if (output.indexOf("Error") != -1){
+            Show.message(output);
+            Show.criticalError("Compilation Error");
+        }
+
         var resultLine = output.substr(output.indexOf("PLATFORMS TESTED:"));
         resultLine = resultLine.substr(0,resultLine.indexOf("\n"));
 
+
+        //PLATFORMS TESTED: 2, PASSED: 0, FAILED: 2, ERRORS: 0, TIME: 1.13492
         var failChunk = resultLine.substr(resultLine.indexOf("FAILED:")+8);
         failChunk = failChunk.substr(0, failChunk.indexOf(","));
         var platformFailures = Std.parseInt(failChunk);
         if (platformFailures > 0)
         {
-            Show.criticalError("Test Failures ");
+            Show.criticalError("Test Failures : " + failChunk);
         }
 
         var errorChunk = resultLine.substr(resultLine.indexOf("ERRORS:")+8);
@@ -97,7 +103,7 @@ class MunitTests implements TestFramework{
         var platformErrors = Std.parseInt(errorChunk);
         if (platformErrors > 0)
         {
-            Show.criticalError("Test Errors ");
+            Show.criticalError("Test Errors : " + errorChunk);
         }
     }
 

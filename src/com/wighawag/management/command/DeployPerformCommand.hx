@@ -121,6 +121,8 @@ class DeployPerformCommand extends BaseYogaProjectCommand
                         + newContent.substr(preparedEnd + 11);
 
         currentProjectFile.writeString(newContent,false);
+
+        Show.success();
     }
 
     private function incrementVersion(version: String) : String{

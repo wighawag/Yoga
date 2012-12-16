@@ -38,6 +38,8 @@ class SetupSystemCommand extends Command{
 			Sys.command("rm -rf /usr/bin/yoga");
 			Sys.command("ln -s " + haxePath +"/yoga /usr/bin/yoga");
 		}
+
+        Show.done();
 	}
 
     private function checkHaxePathExistence(haxePath : String, haxePathEnvironementVariableDefined : Bool) : Void{

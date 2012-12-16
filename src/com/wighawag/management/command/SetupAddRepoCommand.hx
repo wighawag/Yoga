@@ -43,6 +43,7 @@ class SetupAddRepoCommand  extends Command{
             settingsFile.createFile("<settings><repositories><repository url='" + url + "' /></repositories></settings>");
         }
 
+        Show.done();
     }
 
 
