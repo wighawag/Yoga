@@ -323,12 +323,18 @@ class YogaProject
         return prepared != null;
     }
 	
-	public function join(yogaSettings : YogaSettings, dependencySet : DependencySet) : Void
+	public function join(yogaSettings : YogaSettings, dependencySet : DependencySet, step : Int) : Void
 	{
+		var indentation = "";
+		for (i in 0...step){
+			indentation += "  ";
+		}
+		if (dependencies.length > 0)Show.message(indentation + "Dependencies for " + id + "_" + version);
 		for (dependency in dependencies)
 		{
+			Show.message(indentation + "  -" + dependency.descriptionId());
             if (!dependencySet.contains(dependency)){
-                dependency.grab(yogaSettings, dependencySet);
+                dependency.grab(yogaSettings, dependencySet, step);
             }
 		}
 	}

@@ -16,6 +16,6 @@ class DependencyYogaCommand extends BaseYogaProjectCommand
 		super.execute();
 		
 		dependencySet = new DependencySet();
-		currentProject.join(yogaSettings, dependencySet);
+		currentProject.join(yogaSettings, dependencySet, 1);
 	}
 }

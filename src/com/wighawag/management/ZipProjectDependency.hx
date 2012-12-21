@@ -35,7 +35,7 @@ class ZipProjectDependency implements Dependency
 		return ""; // transormed into a source repository ?
 	}
 	
-	public function grab(settings:YogaSettings, dependencySet:DependencySet):Void 
+	public function grab(settings:YogaSettings, dependencySet:DependencySet, step : Int):Void
 	{
 		var localRepoProjectDirectory  = settings.localZipProjectRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
 		
@@ -102,15 +102,19 @@ class ZipProjectDependency implements Dependency
 			if (!dependencySet.contains(sourceDependency))
 			{
 				dependencySet.add(sourceDependency);
-			
-				dependencyProject.join(settings, dependencySet);
 			}
 		}
+
+		dependencyProject.join(settings, dependencySet, step);
 	}
 	
 	public function getUniqueId():String 
 	{
 		return "ZipProjectDependency_" + url;
+	}
+
+	public function descriptionId():String {
+		return getUniqueId();
 	}
 	
 }

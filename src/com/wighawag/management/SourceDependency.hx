@@ -6,9 +6,13 @@ class SourceDependency implements Dependency
 
 	public var path : String;
 	private var _uniqueId : String;
+	public var projectId : String;
+	public var projectVersion : String;
 	
-	public function new(path : String, uniqueId : String) 
+	public function new(path : String, uniqueId : String, ?projectId : String = null, ?projectVersion : String = null)
 	{
+		this.projectId = projectId;
+		this.projectVersion = projectVersion;
 		_uniqueId = uniqueId;
 		if (path.charAt(path.length - 1) == "\\")
 		{
@@ -29,7 +33,7 @@ class SourceDependency implements Dependency
 		return '<source path="' + path +'" />';
 	}
 
-	public function grab(settings : YogaSettings, dependencySet:DependencySet):Void 
+	public function grab(settings : YogaSettings, dependencySet:DependencySet, step : Int):Void
 	{
 		dependencySet.add(this);
 	}
@@ -38,5 +42,13 @@ class SourceDependency implements Dependency
 	{
 		return "SourceDependency_" + _uniqueId;
 	}
-	
+
+	public function descriptionId():String {
+		if(projectId == null){
+			return getUniqueId();
+		}else{
+			return "project " + projectId + "_" + projectVersion;
+		}
+
+	}
 }

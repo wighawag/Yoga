@@ -36,15 +36,23 @@ class DependencySet
 				}
 				
 			}
-			else if (type == RepositoryDependency)
+			else if (type == RepositoryDependency) // TODO NEVER reach there si nce RepositoryDependency get transformed into SourceDependency
 			{
 				var registeredRepoDependency : RepositoryDependency = cast(registeredDependency, RepositoryDependency);
 				// TODO : deal with version comp:
-				if (registeredRepoDependency.version != cast(dependency, HaxelibDependency).version)
+				if (registeredRepoDependency.version != cast(dependency, RepositoryDependency).version)
 				{
-                    Show.criticalError("dependencies on different versions (" + registeredRepoDependency.version + " vs " + cast(dependency, HaxelibDependency).version + ")");
+                    Show.criticalError("dependencies on different versions (" + registeredRepoDependency.version + " vs " + cast(dependency, RepositoryDependency).version + ")");
 				}
-			}
+			}else if (type == SourceDependency)
+				{
+					var registeredSourceDependency : SourceDependency = cast(registeredDependency, SourceDependency);
+					// TODO : deal with version comp:
+					if (registeredSourceDependency.projectVersion != null && registeredSourceDependency.projectVersion != cast(dependency, SourceDependency).projectVersion)
+					{
+						Show.criticalError("dependencies on different versions for " + registeredSourceDependency.projectId + " (" + registeredSourceDependency.projectVersion + " vs " + cast(dependency, SourceDependency).projectVersion + ")");
+					}
+				}
 			
 		}
 		else

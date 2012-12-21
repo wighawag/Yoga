@@ -33,7 +33,7 @@ class HaxelibDependency implements Dependency
 		return '<haxelib name="'+ name +'" version="' + version + '" />';
 	}
 	
-	public function grab(settings : YogaSettings, dependencySet : DependencySet) : Void
+	public function grab(settings : YogaSettings, dependencySet : DependencySet, step : Int) : Void
 	{
 		var returnCode = Haxelib.install(name, version);
 		if (returnCode > 1)
@@ -47,5 +47,10 @@ class HaxelibDependency implements Dependency
 	{
 		return "HaxelibDependency_" + name;
 	}
-	
+
+	public function descriptionId():String {
+		return "haxelib " + name + " " + version;
+	}
+
+
 }

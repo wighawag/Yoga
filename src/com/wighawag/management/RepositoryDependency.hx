@@ -29,7 +29,7 @@ class RepositoryDependency implements Dependency
 		return ""; // should be transformed into a sourceDependency ?
 	}
 	
-	public function grab(settings : YogaSettings, dependencySet : DependencySet ):Void 
+	public function grab(settings : YogaSettings, dependencySet : DependencySet, step : Int ):Void
 	{
 		
 		var localRepoProjectDirectory = settings.localRepoProjectRepo.resolveDirectory(id + "_" + version);
@@ -69,16 +69,12 @@ class RepositoryDependency implements Dependency
 			
 		for (sourceFolder in dependencyProject.sources)
 		{
-			
-			var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(sourceFolder).nativePath, dependencyProject.id + '_' + sourceFolder);
-			if (!dependencySet.contains(sourceDependency))
-			{
-				dependencySet.add(sourceDependency);
-			
-				//(+get dependencies if specified (recusrive))
-				dependencyProject.join(settings, dependencySet);
-			}
+			var sourceDependency : SourceDependency = new SourceDependency(localRepoProjectDirectory.resolveDirectory(sourceFolder).nativePath, dependencyProject.id + '_' + sourceFolder, dependencyProject.id, dependencyProject.version);
+			dependencySet.add(sourceDependency);
 		}
+
+		//Show.message("Dependencies for " + dependencyProject.id + "_" + dependencyProject.version);
+		dependencyProject.join(settings, dependencySet, step + 1);
 	}
 	
 	public function getUniqueId():String 
@@ -89,5 +85,9 @@ class RepositoryDependency implements Dependency
     public function isSnapshot() : Bool{
         return version.indexOf("-SNAPSHOT") == (version.length - 9);
     }
+
+	public function descriptionId():String {
+		return "project " + id + "_" + version;
+	}
 	
 }

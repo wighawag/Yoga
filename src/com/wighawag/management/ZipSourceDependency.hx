@@ -31,7 +31,7 @@ class ZipSourceDependency implements Dependency
 		return ""; // transormed into a source repository ?
 	}
 	
-	public function grab(settings:YogaSettings, dependencySet:DependencySet):Void 
+	public function grab(settings:YogaSettings, dependencySet:DependencySet, step : Int):Void
 	{
 		var localRepoProjectDirectory  = settings.localZipSourceRepo.resolveDirectory(StringTools.replace(StringTools.replace(url.substr(7), "/", "_"), ":", "_"));
 		
@@ -95,6 +95,10 @@ class ZipSourceDependency implements Dependency
 	public function getUniqueId():String 
 	{
 		return "ZipSourceDependency_" + url;
+	}
+
+	public function descriptionId():String {
+		return getUniqueId();
 	}
 	
 }
