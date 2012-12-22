@@ -76,10 +76,10 @@ class RepositoryDependency implements Dependency
 		//Show.message("Dependencies for " + dependencyProject.id + "_" + dependencyProject.version);
 		dependencyProject.join(settings, dependencySet, step + 1);
 	}
-	
+
 	public function getUniqueId():String 
 	{
-		return "RepositoryDependency_" + id;
+		return "RepositoryDependency_" + id + "_" + version;
 	}
 
     public function isSnapshot() : Bool{

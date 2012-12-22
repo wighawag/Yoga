@@ -34,6 +34,9 @@ class YogaProject
 
 	public function new(content : String, ?warn = true)
 	{
+		if (repositoryDependencySeen == null){
+			repositoryDependencySeen = new Hash();
+		}
 		configFiles = new Array<ConfigFile>();
 		compilerParameters = new Array<String>();
 		sources = new Array<String>();
@@ -329,14 +332,25 @@ class YogaProject
 		for (i in 0...step){
 			indentation += "  ";
 		}
-		if (dependencies.length > 0)Show.message(indentation + "Dependencies for " + id + "_" + version);
+		if (dependencies.length > 0)Show.message(indentation + "* Dependencies for " + id + "_" + version);
 		for (dependency in dependencies)
 		{
-			Show.message(indentation + "  -" + dependency.descriptionId());
+			Show.message(indentation + "- " + dependency.descriptionId());
             if (!dependencySet.contains(dependency)){
+	            if (Std.is(dependency, RepositoryDependency)){
+		            var repoDependency : RepositoryDependency = cast(dependency);
+		            var repoIdVersion = repoDependency.getUniqueId();
+		            if(repositoryDependencySeen.exists(repoIdVersion)){
+			            continue;
+			        }
+		            repositoryDependencySeen.set(repoIdVersion, true);
+	            }
                 dependency.grab(yogaSettings, dependencySet, step);
             }
 		}
+		Show.message(indentation + "***" );
 	}
+
+	public static var repositoryDependencySeen : Hash<Bool>;
 }
 
