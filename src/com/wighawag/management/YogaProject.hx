@@ -270,6 +270,9 @@ class YogaProject
 					case "haxelib" : 
 						var libraryName : String = dependency.get("name");
 						var version : String = dependency.get("version");
+						if (version == "" || version=="null"){
+							version = null;
+						}
 						
 						dependencies.push(new HaxelibDependency(libraryName, version));
 						

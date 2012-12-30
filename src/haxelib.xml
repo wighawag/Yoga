@@ -1,6 +1,6 @@
 <project name="yoga" url="https://github.com/wighawag/Yoga" license="GPL">
 	<description>Yoga aims to be a tool like maven with at first the functionality of dependency management and project setup.</description>
-    <version name="0.3.2">improve output and alert when veersion conflict</version>
+    <version name="0.3.3">fixes</version>
     <user name="wighawag"/>
     <tag v="maven"/>
     <tag v="build"/>

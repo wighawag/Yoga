@@ -35,11 +35,16 @@ class HaxelibDependency implements Dependency
 	
 	public function grab(settings : YogaSettings, dependencySet : DependencySet, step : Int) : Void
 	{
-		var returnCode = Haxelib.install(name, version);
-		if (returnCode > 1)
-		{
-			Show.criticalError("failed installing haxelib " + name + " version " + version );
+		if(version != null){
+			var returnCode = Haxelib.install(name, version);
+			if (returnCode > 1)
+			{
+				Show.criticalError("failed installing haxelib " + name + " version " + version );
+			}
+		}else{
+			Show.message("use current version, make usre it is the one you want and you have it installed");
 		}
+
 		dependencySet.add(this);
 	}
 	

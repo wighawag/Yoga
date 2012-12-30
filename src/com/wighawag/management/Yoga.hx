@@ -1,4 +1,5 @@
 package com.wighawag.management;
+import com.wighawag.management.command.DependencyUseVersionCommand;
 import com.wighawag.util.Show;
 import com.wighawag.management.command.DeployPrepareCommand;
 import com.wighawag.management.command.ConfigCommand;
@@ -27,6 +28,8 @@ class Yoga extends CommandLineRunner {
 
         mapCommand(SetupSystemCommand, "setup:system", ["s"], "setup yoga so that it can be called with 'yoga' instead of 'haxelib run yoga' the project");
         mapCommand(SetupAddRepoCommand, "setup:addRepo", ["a"], "add a repository from which to grap dependencies");
+
+		mapCommand(DependencyUseVersionCommand, "dependency:useVersion", [], "set the version of a dependency (do not add it if not present)");
 
 		run();
 	}

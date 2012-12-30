@@ -3,7 +3,7 @@
 	<compiler-version>2.10</compiler-version>
 
 	<id>com.wighawag.management.Yoga</id>
-	<version>0.3.2-SNAPSHOT</version>
+	<version>0.3.4-SNAPSHOT</version>
 
 	<main>com.wighawag.management.Yoga</main>
 
@@ -25,8 +25,8 @@
 		<!--<haxelib name="hxssl"/>-->
 		<!--<haxelib name="munit"  /> -->
 		<!--<haxelib name="haxelib-runner"/>-->
-		<haxelib name="semver" version="1.0.0" />
-        	<repository id="com.wighawag.appengine-login" version="0.1.0" />
-	        <repository id="com.wighawag.wighawag-mlib" version="0.1.0"/>
+		<haxelib name="semver" version="1.0.0"/>
+        	<repository version="0.1.0" id="com.wighawag.appengine-login"/>
+	        <repository version="0.1.0" id="com.wighawag.wighawag-mlib"/>
 	</dependencies>
 </project>
