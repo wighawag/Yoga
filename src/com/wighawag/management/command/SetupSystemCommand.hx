@@ -24,7 +24,7 @@ class SetupSystemCommand extends Command{
 				haxePath = "C:\\Motion-Twin\\haxe\\";
 			}
             checkHaxePathExistence(haxePath, haxePathEnvironementVariableDefined);
-			File.copy (console.originalDir.nativePath + "\\yoga.bat", haxePath + "yoga.bat");
+			File.copy (console.originalDir.nativePath + "\\yoga.bat", haxePath + "\\yoga.bat");
 
 		} else {
             if (haxePath == null || haxePath == "") {
@@ -32,11 +32,11 @@ class SetupSystemCommand extends Command{
             }
             checkHaxePathExistence(haxePath, haxePathEnvironementVariableDefined);
 
-			File.copy (console.originalDir.nativePath + "/yoga.sh", haxePath);
-			Sys.command ("chmod", [ "755", haxePath + "/yoga" ]);
+			File.copy (console.originalDir.nativePath + "/yoga.sh", haxePath + "/yoga.sh");
+			Sys.command ("chmod", [ "755", haxePath + "/yoga.sh" ]);
 			
 			Sys.command("rm -rf /usr/bin/yoga");
-			Sys.command("ln -s " + haxePath +"/yoga /usr/bin/yoga");
+			Sys.command("ln -s " + haxePath +"/yoga.sh /usr/bin/yoga");
 		}
 
         Show.done();
